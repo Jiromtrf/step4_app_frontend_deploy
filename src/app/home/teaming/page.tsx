@@ -112,6 +112,9 @@ export default function Teaming() {
           Authorization: `Bearer ${session?.accessToken}`,
         },
       });
+      // 未使用のためコメントアウト
+      // const teamMembers = response.data;
+
       const teamMembersData = response.data;
       const newRoles: Roles = { PdM: null, Biz: null, Tech: null, Design: null };
 
@@ -191,11 +194,13 @@ export default function Teaming() {
             Authorization: `Bearer ${session?.accessToken}`,
           },
         });
-        const teamMembers = teamInfoResponse.data;
+        // teamInfo は未使用のため削除
+
+        const teamMembersData = teamInfoResponse.data;
         const unfilledRoles = ["PdM", "Biz", "Tech", "Design"].filter(r => !roles[r as keyof Roles]);
 
         const recommended = response.data.data.filter((u: User) => {
-          return u.orientations && unfilledRoles.some(r => u.orientations?.includes(r));
+          return u.orientations && unfilledRoles.some(r => u.orientations.includes(r));
         }).map((u: User) => u.user_id);
 
         setRecommendedUsers(recommended);
@@ -212,7 +217,7 @@ export default function Teaming() {
     }
   }, [baseUrl, currentTeamId, roles, searchFilters, session?.accessToken]);
 
-  const handleRemoveMember = useCallback(async (role: string) => {
+  const handleRemoveMember = useCallback(async (role: string) => { // Removed 'user' parameter
     if (!currentTeamId) {
       alert("チームが存在しません");
       return;

@@ -30,11 +30,11 @@ const Home: React.FC = () => {
   const [audioPlayed, setAudioPlayed] = useState<boolean>(false);
 
   const toggleSidebar = useCallback(() => {
-    setSidebarVisible((prev) => !prev);
+    setSidebarVisible(prev => !prev);
   }, []);
 
   const toggleMessages = useCallback(() => {
-    setMessagesVisible((prev) => !prev);
+    setMessagesVisible(prev => !prev);
   }, []);
 
   const fetchMessages = useCallback(async () => {
@@ -72,7 +72,7 @@ const Home: React.FC = () => {
     let index = 0;
     setGreetingMessage('');
     const interval = setInterval(() => {
-      setGreetingMessage((prev) => text.slice(0, index + 1));
+      setGreetingMessage(prev => text.slice(0, index + 1));
       index++;
       if (index >= text.length) {
         clearInterval(interval);
