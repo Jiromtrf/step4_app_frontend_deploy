@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import Link from 'next/link';
 import styles from '../page.module.css';
@@ -30,42 +30,50 @@ const Home: React.FC = () => {
     setMessagesVisible(!isMessagesVisible);
   };
 
-  const sendMessage = async () => {
+  const fetchMessages = useCallback(async () => {
+    try {
+      const response = await axios.get('http://localhost:8000/get_messages/');
+      setMessages(response.data.data);
+    } catch (err: unknown) {
+      setError('メッセージの取得に失敗しました');
+      if (axios.isAxiosError(err) && err.response) {
+        console.error('Error retrieving messages:', err.response.data);
+      } else {
+        console.error('Error retrieving messages:', (err as Error).message);
+      }
+    }
+  }, [setMessages, setError]);
+
+  const sendMessage = useCallback(async () => {
     if (message.trim() === '') return;
     try {
       const response = await axios.post('http://localhost:8000/send_message/', { text: message });
       console.log('Message sent:', response.data);
       setMessage('');
       fetchMessages();
-    } catch (err) {
+    } catch (err: unknown) {
       setError('メッセージの送信に失敗しました');
-      console.error('Error sending message:', err.response ? err.response.data : err.message);
+      if (axios.isAxiosError(err) && err.response) {
+        console.error('Error sending message:', err.response.data);
+      } else {
+        console.error('Error sending message:', (err as Error).message);
+      }
     }
-  };
+  }, [message, fetchMessages]);
 
-  const fetchMessages = async () => {
-    try {
-      const response = await axios.get('http://localhost:8000/get_messages/');
-      setMessages(response.data.data);
-    } catch (err) {
-      setError('メッセージの取得に失敗しました');
-      console.error('Error retrieving messages:', err.response ? err.response.data : err.message);
-    }
-  };
-
-  const typeWriterEffect = (text: string, delay: number = 80) => {
+  const typeWriterEffect = useCallback((text: string, delay: number = 80) => {
     let index = 0;
     setGreetingMessage('');
     const interval = setInterval(() => {
-      setGreetingMessage(text.slice(0, index + 1));
+      setGreetingMessage((prev) => text.slice(0, index + 1));
       index++;
       if (index >= text.length) {
         clearInterval(interval);
       }
     }, delay);
-  };
+  }, []);
 
-  const updateGreetingMessage = () => {
+  const updateGreetingMessage = useCallback(() => {
     const currentHour = new Date().getHours();
     const messages = {
       morning: ['おはよー！朝から頑張って偉いね！'],
@@ -74,7 +82,8 @@ const Home: React.FC = () => {
       night: ['遅くまでえらいねー。もうひとふんばり！'],
       lateNight: ['お疲れ様！そろそろ寝た方がいいよ！'],
     };
-    let selectedMessages = [];
+
+    let selectedMessages: string[];
     if (currentHour >= 5 && currentHour < 12) {
       selectedMessages = messages.morning;
     } else if (currentHour >= 12 && currentHour < 17) {
@@ -86,9 +95,10 @@ const Home: React.FC = () => {
     } else {
       selectedMessages = messages.lateNight;
     }
+
     const randomMessage = selectedMessages[Math.floor(Math.random() * selectedMessages.length)];
     typeWriterEffect(randomMessage);
-  };
+  }, [typeWriterEffect]);
 
   const playAudio = () => {
     const audio = new Audio('/お疲れ様です.mp3');
@@ -105,7 +115,7 @@ const Home: React.FC = () => {
   useEffect(() => {
     fetchMessages();
     updateGreetingMessage();
-  }, []);
+  }, [fetchMessages, updateGreetingMessage]);
 
   return (
     <div className={styles.container} onClick={handlePlayAudio}>
@@ -122,9 +132,7 @@ const Home: React.FC = () => {
           <li><Link href="/home/checktest">理解度チェック</Link></li>
           <li><a href="#">勉強する</a></li>
           <li><a href="#">遊びに行く</a></li>
-          <li>
-            <Link href="/home/teaming">チーミング</Link>
-          </li>
+          <li><Link href="/home/teaming">チーミング</Link></li>
           <li><SignoutButton /></li>
         </ul>
       </div>
@@ -133,6 +141,7 @@ const Home: React.FC = () => {
       </button>
       <div className={styles.content}>
         <div className={styles.greeting}>{greetingMessage}</div>
+        {error && <div style={{ color: 'red', marginBottom: '1em' }}>{error}</div>}
         <button onClick={toggleMessages} className={styles.messageToggleButton}>
           {isMessagesVisible ? 'メッセージ一覧を隠す' : 'メッセージ一覧を表示'}
         </button>
