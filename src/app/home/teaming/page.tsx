@@ -1,3 +1,5 @@
+// frontend/src/app/home/teaming/page.tsx
+
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
@@ -112,10 +114,8 @@ export default function Teaming() {
           Authorization: `Bearer ${session?.accessToken}`,
         },
       });
-      // 未使用のためコメントアウト
-      // const teamMembers = response.data;
+      const teamMembersData = response.data;
 
-      const teamMembersData = response.data; // ここで使用していないので削除するか使用する
       const newRoles: Roles = { PdM: null, Biz: null, Tech: null, Design: null };
 
       teamMembersData.forEach((member: User) => {
@@ -189,13 +189,6 @@ export default function Teaming() {
       setSearchResults(response.data.data);
 
       if (currentTeamId) {
-        // teamMembersData は未使用のため削除
-        await axios.get<User[]>(`${baseUrl}/api/team/${currentTeamId}`, {
-          headers: {
-            Authorization: `Bearer ${session?.accessToken}`,
-          },
-        });
-
         const unfilledRoles = ["PdM", "Biz", "Tech", "Design"].filter(r => !roles[r as keyof Roles]);
 
         const recommended = response.data.data.filter((u: User) => {
@@ -216,7 +209,7 @@ export default function Teaming() {
     }
   }, [baseUrl, currentTeamId, roles, searchFilters, session?.accessToken]);
 
-  const handleRemoveMember = useCallback(async (role: string) => { // 'user' パラメータを削除
+  const handleRemoveMember = useCallback(async (role: string) => {
     if (!currentTeamId) {
       alert("チームが存在しません");
       return;
