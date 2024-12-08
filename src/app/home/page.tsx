@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Link from 'next/link';
 import styles from '../page.module.css';
@@ -27,53 +27,45 @@ const Home: React.FC = () => {
   };
 
   const toggleMessages = () => {
-    setMessagesVisible(!isMessagesVisible);
+    setMessagesVisible((/* prev */) => !isMessagesVisible); // prevをコメントアウト
   };
 
-  const fetchMessages = useCallback(async () => {
-    try {
-      const response = await axios.get('http://localhost:8000/get_messages/');
-      setMessages(response.data.data);
-    } catch (err: unknown) {
-      setError('メッセージの取得に失敗しました');
-      if (axios.isAxiosError(err) && err.response) {
-        console.error('Error retrieving messages:', err.response.data);
-      } else {
-        console.error('Error retrieving messages:', (err as Error).message);
-      }
-    }
-  }, [setMessages, setError]);
-
-  const sendMessage = useCallback(async () => {
+  const sendMessage = async () => {
     if (message.trim() === '') return;
     try {
       const response = await axios.post('http://localhost:8000/send_message/', { text: message });
       console.log('Message sent:', response.data);
       setMessage('');
       fetchMessages();
-    } catch (err: unknown) {
+    } catch (err: any) {
       setError('メッセージの送信に失敗しました');
-      if (axios.isAxiosError(err) && err.response) {
-        console.error('Error sending message:', err.response.data);
-      } else {
-        console.error('Error sending message:', (err as Error).message);
-      }
+      console.error('Error sending message:', err.response ? err.response.data : err.message);
     }
-  }, [message, fetchMessages]);
+  };
 
-  const typeWriterEffect = useCallback((text: string, delay: number = 80) => {
+  const fetchMessages = async () => {
+    try {
+      const response = await axios.get('http://localhost:8000/get_messages/');
+      setMessages(response.data.data);
+    } catch (err: any) {
+      setError('メッセージの取得に失敗しました');
+      console.error('Error retrieving messages:', err.response ? err.response.data : err.message);
+    }
+  };
+
+  const typeWriterEffect = (text: string, delay: number = 80) => {
     let index = 0;
     setGreetingMessage('');
     const interval = setInterval(() => {
-      setGreetingMessage((prev) => text.slice(0, index + 1));
+      setGreetingMessage(text.slice(0, index + 1));
       index++;
       if (index >= text.length) {
         clearInterval(interval);
       }
     }, delay);
-  }, []);
+  };
 
-  const updateGreetingMessage = useCallback(() => {
+  const updateGreetingMessage = () => {
     const currentHour = new Date().getHours();
     const messages = {
       morning: ['おはよー！朝から頑張って偉いね！'],
@@ -82,7 +74,6 @@ const Home: React.FC = () => {
       night: ['遅くまでえらいねー。もうひとふんばり！'],
       lateNight: ['お疲れ様！そろそろ寝た方がいいよ！'],
     };
-
     let selectedMessages: string[];
     if (currentHour >= 5 && currentHour < 12) {
       selectedMessages = messages.morning;
@@ -95,10 +86,9 @@ const Home: React.FC = () => {
     } else {
       selectedMessages = messages.lateNight;
     }
-
     const randomMessage = selectedMessages[Math.floor(Math.random() * selectedMessages.length)];
     typeWriterEffect(randomMessage);
-  }, [typeWriterEffect]);
+  };
 
   const playAudio = () => {
     const audio = new Audio('/お疲れ様です.mp3');
@@ -115,7 +105,7 @@ const Home: React.FC = () => {
   useEffect(() => {
     fetchMessages();
     updateGreetingMessage();
-  }, [fetchMessages, updateGreetingMessage]);
+  }, []);
 
   return (
     <div className={styles.container} onClick={handlePlayAudio}>

@@ -10,7 +10,7 @@ export default function CategorySelection() {
 
     const [categories, setCategories] = useState<string[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<string>("");
-    const [error, setError] = useState<string | null>(null);
+    const [error, /* setError */] = useState<string | null>(null); // setErrorをコメントアウト
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     useEffect(() => {
