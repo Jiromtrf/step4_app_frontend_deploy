@@ -1,0 +1,194 @@
+.container {
+    display: flex;
+    height: 100vh;
+    background-image: url('/Gal1.webp');
+    background-size: cover;
+    background-position: center;
+    color: #fff;
+    position: relative;
+  }
+  
+  .sidebar {
+    width: 250px;
+    background: linear-gradient(135deg, rgba(34, 34, 34, 0.8), rgba(68, 68, 68, 0.9));
+    padding: 40px;
+    transition: transform 0.3s ease;
+    position: relative;
+    z-index: 1;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2); /* サイドバーにシャドウを追加 */
+    border-radius: 0 8px 8px 0; /* サイドバー右側に丸みを追加 */
+  }
+  
+  /* 表示されている状態 */
+  .sidebarVisible {
+    transform: translateX(0);
+  }
+  
+  /* 非表示の状態 */
+  .sidebarHidden {
+    transform: translateX(-200px);
+  }
+  
+  .sidebarList {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .sidebar h2 {
+    font-size: 1.5em;
+    color: #ffcc00;
+    margin-bottom: 20px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6); /* タイトルに影を追加 */
+  }
+  
+  /* サイドバーのリンクにスタイルを追加 */
+  .sidebarList li {
+    margin-bottom: 15px;
+  }
+  
+  .sidebarList li a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.1em;
+    display: block;
+    padding: 10px 15px;
+    border-radius: 4px;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+  
+  /* リンクのホバーエフェクト */
+  .sidebarList li a:hover {
+    background-color: #ffcc00;
+    color: #333;
+  }
+  
+  .toggleButton {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #ffcc00;
+    color: #000;
+    cursor: pointer;
+    z-index: 2;
+    border: none;
+    border-radius: 0 4px 4px 0;
+    padding: 0;
+  }
+  
+  .content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 20px;
+    margin-left: 20px;
+  }
+  
+  .inputArea {
+    display: flex;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+  }
+  
+  .input {
+    flex: 1;
+    margin-right: 10px;
+    padding: 10px;
+    border-radius: 4px;
+    border: none;
+    background-color: #fff;
+    color: #000;
+  }
+  
+  .button {
+    padding: 10px 20px;
+    border-radius: 4px;
+    border: none;
+    background-color: #ffcc00;
+    color: #000;
+    cursor: pointer;
+  }
+  
+  .messages {
+    height: 25vh;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+  
+  .messageList {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .messageItem {
+    margin-bottom: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 10px;
+    border-radius: 4px;
+  }
+  
+  .reactions {
+    margin-top: 5px;
+  }
+  
+  .reaction {
+    display: inline-block;
+    margin-right: 5px;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 3px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+  }
+  
+  .greeting {
+    font-size: 1.2em;
+    margin: 10px 0; /* 上下の余白 */
+    padding: 15px 20px;
+    background-color: rgba(255, 255, 255, 0.9); /* 白系統の背景色 */
+    color: #333;
+    text-align: center;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 少し強めの影 */
+    position: relative;
+    display: inline-block;
+    max-width: 80%;
+    font-weight: bold; /* 太字にして視認性を向上 */
+  }
+  
+  /* 吹き出しの三角部分 (上方向) */
+  .greeting::before {
+    content: '';
+    position: absolute;
+    top: -10px; /* 三角形をボックスの上に配置 */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 10px solid rgba(255, 255, 255, 0.9); /* 白系統の背景色と一致 */
+  }
+  
+  .dateTime {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    font-size: 14px;
+    color: #555;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 5px 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+  }
+  
