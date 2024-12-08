@@ -1,37 +1,60 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import dynamic from "next/dynamic";
 import { useSession } from "next-auth/react";
 import styles from "./teaming.module.css";
 import Modal from "react-modal";
+import Image from "next/image";
 
 const RadarChart = dynamic(() => import("../../components/RadarChart"), { ssr: false });
 
+interface User {
+  user_id: number;
+  name: string;
+  avatar_url?: string;
+  biz?: number;
+  design?: number;
+  tech?: number;
+  specialties?: string[];
+  orientations?: string[];
+  core_time?: string;
+  role?: string;
+  team_id?: number;
+}
+
+interface Roles {
+  PdM: User | User[] | null;
+  Biz: User | User[] | null;
+  Tech: User | User[] | null;
+  Design: User | User[] | null;
+}
+
+interface ChartData {
+  biz: number;
+  design: number;
+  tech: number;
+}
+
 export default function Teaming() {
   const { data: session } = useSession();
-  const [currentUser, setCurrentUser] = useState<any>(null);
-  const [roles, setRoles] = useState<{
-    PdM: any | null,
-    Biz: any | null,
-    Tech: any | null,
-    Design: any | null,
-  }>({
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [roles, setRoles] = useState<Roles>({
     PdM: null,
     Biz: null,
     Tech: null,
     Design: null,
   });
-  const [chartData, setChartData] = useState({ biz: 0, design: 0, tech: 0 });
+  const [chartData, setChartData] = useState<ChartData>({ biz: 0, design: 0, tech: 0 });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchFilters, setSearchFilters] = useState({
     name: "",
     specialties: [] as string[],
     orientations: [] as string[],
   });
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [recommendedUsers, setRecommendedUsers] = useState<string[]>([]);
+  const [searchResults, setSearchResults] = useState<User[]>([]);
+  const [recommendedUsers, setRecommendedUsers] = useState<number[]>([]);
   const [currentTeamId, setCurrentTeamId] = useState<number | null>(null);
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
   const [isCreateTeamModalOpen, setIsCreateTeamModalOpen] = useState(false);
@@ -49,14 +72,14 @@ export default function Teaming() {
     }
   }, []);
 
-  const fetchCurrentUser = async () => {
+  const fetchCurrentUser = useCallback(async () => {
     try {
       if (!session || !session.accessToken) {
         console.error("セッションがありません");
         return;
       }
 
-      const response = await axios.get(`${baseUrl}/api/user/me`, {
+      const response = await axios.get<User>(`${baseUrl}/api/user/me`, {
         headers: {
           Authorization: `Bearer ${session.accessToken}`,
         },
@@ -67,12 +90,16 @@ export default function Teaming() {
       } else {
         setCurrentTeamId(null);
       }
-    } catch (err: any) {
-      console.error("Failed to fetch current user:", err.response?.data || err.message || err);
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        console.error("Failed to fetch current user:", err.response?.data || err.message);
+      } else {
+        console.error("Failed to fetch current user:", (err as Error).message);
+      }
     }
-  };
+  }, [session, baseUrl]);
 
-  const fetchTeamInfo = async () => {
+  const fetchTeamInfo = useCallback(async () => {
     if (!currentTeamId) {
       setRoles({ PdM: null, Biz: null, Tech: null, Design: null });
       setChartData({ biz: 0, design: 0, tech: 0 });
@@ -80,32 +107,30 @@ export default function Teaming() {
     }
 
     try {
-      const response = await axios.get(`${baseUrl}/api/team/${currentTeamId}`, {
+      const response = await axios.get<User[]>(`${baseUrl}/api/team/${currentTeamId}`, {
         headers: {
           Authorization: `Bearer ${session?.accessToken}`,
         },
       });
-      // 未使用のためコメントアウト
-      // const teamMembers = response.data;
+      const teamMembersData = response.data;
+      const newRoles: Roles = { PdM: null, Biz: null, Tech: null, Design: null };
 
-      const teamMembersData = response.data; // 実際には別名で代替使用
-      const newRoles: any = { PdM: null, Biz: null, Tech: null, Design: null };
-
-      teamMembersData.forEach((member: any) => {
-        if (newRoles[member.role]) {
-          if (Array.isArray(newRoles[member.role])) {
-            newRoles[member.role].push(member);
-          } else {
-            newRoles[member.role] = [newRoles[member.role], member];
-          }
+      teamMembersData.forEach((member: User) => {
+        const r = member.role as keyof Roles;
+        if (!r) return;
+        const currentValue = newRoles[r];
+        if (currentValue === null) {
+          newRoles[r] = member;
+        } else if (Array.isArray(currentValue)) {
+          currentValue.push(member);
         } else {
-          newRoles[member.role] = member;
+          newRoles[r] = [currentValue, member];
         }
       });
 
       setRoles(newRoles);
 
-      const aggregated = teamMembersData.reduce((acc: any, member: any) => {
+      const aggregated = teamMembersData.reduce((acc: ChartData, member: User) => {
         acc.biz += member.biz || 0;
         acc.design += member.design || 0;
         acc.tech += member.tech || 0;
@@ -113,22 +138,26 @@ export default function Teaming() {
       }, { biz: 0, design: 0, tech: 0 });
 
       setChartData(aggregated);
-    } catch (err: any) {
-      console.error("Failed to fetch team info:", err.response?.data || err.message || err);
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        console.error("Failed to fetch team info:", err.response?.data || err.message);
+      } else {
+        console.error("Failed to fetch team info:", (err as Error).message);
+      }
     }
-  };
+  }, [currentTeamId, baseUrl, session?.accessToken]);
 
   useEffect(() => {
     fetchCurrentUser();
-  }, [session]);
+  }, [fetchCurrentUser]);
 
   useEffect(() => {
     if (currentUser) {
       fetchTeamInfo();
     }
-  }, [currentUser]);
+  }, [currentUser, fetchTeamInfo]);
 
-  const handleAddMemberClick = (role: string) => {
+  const handleAddMemberClick = useCallback((role: string) => {
     const isUserInAnyRole = Object.values(roles).some(roleData => {
       if (Array.isArray(roleData)) {
         return roleData.some(member => member.user_id === currentUser?.user_id);
@@ -145,11 +174,11 @@ export default function Teaming() {
       setSelectedRole(role);
       setIsModalOpen(true);
     }
-  };
+  }, [roles, currentUser]);
 
-  const handleSearch = async () => {
+  const handleSearch = useCallback(async () => {
     try {
-      const response = await axios.post(`${baseUrl}/api/user/search`, searchFilters, {
+      const response = await axios.post<{data: User[]}>(`${baseUrl}/api/user/search`, searchFilters, {
         headers: {
           Authorization: `Bearer ${session?.accessToken}`,
         },
@@ -157,31 +186,33 @@ export default function Teaming() {
       setSearchResults(response.data.data);
 
       if (currentTeamId) {
-        const teamInfoResponse = await axios.get(`${baseUrl}/api/team/${currentTeamId}`, {
+        const teamInfoResponse = await axios.get<User[]>(`${baseUrl}/api/team/${currentTeamId}`, {
           headers: {
             Authorization: `Bearer ${session?.accessToken}`,
           },
         });
-        const teamInfo = teamInfoResponse.data;
+        const teamMembers = teamInfoResponse.data;
+        const unfilledRoles = ["PdM", "Biz", "Tech", "Design"].filter(r => !roles[r as keyof Roles]);
 
-        const unfilledRoles = ["PdM", "Biz", "Tech", "Design"].filter(r => !roles[r]);
-        const recommended = response.data.data.filter((u: any) => {
-          return unfilledRoles.some(r => u.orientations.includes(r));
-        }).map((u: any) => u.user_id);
+        const recommended = response.data.data.filter((u: User) => {
+          return u.orientations && unfilledRoles.some(r => u.orientations?.includes(r));
+        }).map((u: User) => u.user_id);
 
         setRecommendedUsers(recommended);
       } else {
         setRecommendedUsers([]);
       }
 
-    } catch (err: any) {
-      console.error("Failed to search users:", err.response?.data || err.message || err);
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        console.error("Failed to search users:", err.response?.data || err.message);
+      } else {
+        console.error("Failed to search users:", (err as Error).message);
+      }
     }
-  };
+  }, [baseUrl, currentTeamId, roles, searchFilters, session?.accessToken]);
 
-  // userが未使用と指摘された箇所を想定してコメントアウト
-  // 例えば、メンバー削除関数でuserを受け取っているが使っていない場合:
-  const handleRemoveMember = async (role: string /*, user: any */) => { // userをコメントアウト
+  const handleRemoveMember = useCallback(async (role: string) => {
     if (!currentTeamId) {
       alert("チームが存在しません");
       return;
@@ -200,14 +231,18 @@ export default function Teaming() {
         });
         alert("メンバーを削除しました！レーダーチャートを更新します。");
         fetchTeamInfo();
-      } catch (err: any) {
-        console.error("Failed to remove team member:", err.response?.data || err.message || err);
+      } catch (err: unknown) {
+        if (axios.isAxiosError(err)) {
+          console.error("Failed to remove team member:", err.response?.data || err.message);
+        } else {
+          console.error("Failed to remove team member:", (err as Error).message);
+        }
         alert("メンバーの削除に失敗しました");
       }
     }
-  };
+  }, [baseUrl, currentTeamId, fetchTeamInfo, session?.accessToken]);
 
-  const handleSelectUser = async (role: string | null, user: any) => {
+  const handleSelectUser = useCallback(async (role: string | null, user: User) => {
     if (!role) {
       alert("ロールが未選択です");
       return;
@@ -230,15 +265,19 @@ export default function Teaming() {
       alert("メンバーを追加しました！レーダーチャートを更新します。");
       setIsModalOpen(false);
       fetchTeamInfo();
-    } catch (err: any) {
-      console.error("Failed to add team member:", err.response?.data || err.message || err);
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        console.error("Failed to add team member:", err.response?.data || err.message);
+      } else {
+        console.error("Failed to add team member:", (err as Error).message);
+      }
       alert("メンバーの追加に失敗しました");
     }
-  };
+  }, [baseUrl, currentTeamId, fetchTeamInfo, session?.accessToken]);
 
-  const handleCreateTeam = async () => {
+  const handleCreateTeam = useCallback(async () => {
     try {
-      const response = await axios.post(`${baseUrl}/api/team/create`, {
+      const response = await axios.post<{team_id: number}>(`${baseUrl}/api/team/create`, {
         name: newTeamName
       }, {
         headers: {
@@ -249,12 +288,15 @@ export default function Teaming() {
       setCurrentTeamId(response.data.team_id);
       setIsCreateTeamModalOpen(false);
       fetchTeamInfo();
-    } catch (err: any) {
-      console.error("Failed to create team:", err.response?.data || err.message || err);
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        console.error("Failed to create team:", err.response?.data || err.message);
+      } else {
+        console.error("Failed to create team:", (err as Error).message);
+      }
       alert("チームの作成に失敗しました");
     }
-  };
-
+  }, [baseUrl, fetchTeamInfo, newTeamName, session?.accessToken]);
 
   return (
     <div className={styles.container}>
@@ -273,43 +315,50 @@ export default function Teaming() {
         {currentTeamId ? (
           <>
             <div className={styles.roles}>
-              {["PdM", "Biz", "Tech", "Design"].map((role) => (
-                <div key={role} className={styles.roleCard}>
-                  <div className={styles.roleHeader} style={{ backgroundColor: getRoleColor(role) }}>
-                    {role}
-                    <button onClick={() => handleAddMemberClick(role)} className={styles.addButton}>
-                      +
-                    </button>
-                  </div>
-                  {roles[role] && (
-                    <div className={styles.roleDetails}>
-                      {Array.isArray(roles[role]) ? (
-                        roles[role].map((member: any) => (
-                          <div key={member.user_id} className={styles.member}>
-                            <img
-                              src={member.avatar_url || "/default-avatar.png"}
-                              alt={member.name}
-                              className={styles.avatar}
-                            />
-                            <p>{member.name}</p>
-                            <button onClick={() => handleRemoveMember(role/*, member*/)}>メンバーを外す</button>
-                          </div>
-                        ))
-                      ) : (
-                        <div className={styles.member}>
-                          <img
-                            src={roles[role]?.avatar_url || "/default-avatar.png"}
-                            alt={roles[role]?.name}
-                            className={styles.avatar}
-                          />
-                          <p>{roles[role]?.name}</p>
-                          <button onClick={() => handleRemoveMember(role/*, roles[role]*/)}>メンバーを外す</button>
-                        </div>
-                      )}
+              {(["PdM", "Biz", "Tech", "Design"] as (keyof Roles)[]).map((role) => {
+                const roleData = roles[role];
+                return (
+                  <div key={role} className={styles.roleCard}>
+                    <div className={styles.roleHeader} style={{ backgroundColor: getRoleColor(role) }}>
+                      {role}
+                      <button onClick={() => handleAddMemberClick(role)} className={styles.addButton}>
+                        +
+                      </button>
                     </div>
-                  )}
-                </div>
-              ))}
+                    {roleData && (
+                      <div className={styles.roleDetails}>
+                        {Array.isArray(roleData) ? (
+                          roleData.map((member) => (
+                            <div key={member.user_id} className={styles.member}>
+                              <Image
+                                src={member.avatar_url || "/default-avatar.png"}
+                                alt={member.name}
+                                className={styles.avatar}
+                                width={50}
+                                height={50}
+                              />
+                              <p>{member.name}</p>
+                              <button onClick={() => handleRemoveMember(role)}>メンバーを外す</button>
+                            </div>
+                          ))
+                        ) : (
+                          <div className={styles.member}>
+                            <Image
+                              src={roleData.avatar_url || "/default-avatar.png"}
+                              alt={roleData.name}
+                              className={styles.avatar}
+                              width={50}
+                              height={50}
+                            />
+                            <p>{roleData.name}</p>
+                            <button onClick={() => handleRemoveMember(role)}>メンバーを外す</button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
 
             <div className={styles.chartContainer}>
@@ -381,34 +430,40 @@ export default function Teaming() {
           <button onClick={handleSearch}>検索</button>
         </div>
         <div className={styles.searchResults}>
-        {searchResults.map((user) => (
-          <div key={user.user_id} className={styles.searchResult}>
-            <img src={user.avatar_url || "/default-avatar.png"} alt={user.name} className={styles.avatar} />
-            <div>
-              <p><strong>{user.name}</strong></p>
-              <p>
-                得意分野:{" "}
-                {user.specialties && user.specialties.length > 0
-                  ? user.specialties.join(", ")
-                  : "登録なし"}
-              </p>
-              <p>
-                志向性:{" "}
-                {user.orientations && user.orientations.length > 0
-                  ? user.orientations.join(", ")
-                  : "登録なし"}
-              </p>
-              <p>
-                コアタイム:{" "}
-                {user.core_time && user.core_time.trim() !== ""
-                  ? user.core_time
-                  : "登録なし"}
-              </p>
+          {searchResults.map((user) => (
+            <div key={user.user_id} className={styles.searchResult}>
+              <Image
+                src={user.avatar_url || "/default-avatar.png"}
+                alt={user.name}
+                className={styles.avatar}
+                width={50}
+                height={50}
+              />
+              <div>
+                <p><strong>{user.name}</strong></p>
+                <p>
+                  得意分野:{" "}
+                  {user.specialties && user.specialties.length > 0
+                    ? user.specialties.join(", ")
+                    : "登録なし"}
+                </p>
+                <p>
+                  志向性:{" "}
+                  {user.orientations && user.orientations.length > 0
+                    ? user.orientations.join(", ")
+                    : "登録なし"}
+                </p>
+                <p>
+                  コアタイム:{" "}
+                  {user.core_time && user.core_time.trim() !== ""
+                    ? user.core_time
+                    : "登録なし"}
+                </p>
+              </div>
+              {recommendedUsers.includes(user.user_id) && <span className={styles.recommended}>おすすめ</span>}
+              <button onClick={() => handleSelectUser(selectedRole, user)}>追加</button>
             </div>
-            {recommendedUsers.includes(user.user_id) && <span className={styles.recommended}>おすすめ</span>}
-            <button onClick={() => handleSelectUser(selectedRole, user)}>追加</button>
-          </div>
-        ))}
+          ))}
 
         </div>
         <button onClick={() => setIsModalOpen(false)}>閉じる</button>
