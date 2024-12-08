@@ -72,7 +72,7 @@ const Home: React.FC = () => {
     let index = 0;
     setGreetingMessage('');
     const interval = setInterval(() => {
-      setGreetingMessage(prev => text.slice(0, index + 1));
+      setGreetingMessage(text.slice(0, index + 1)); // 'prev' 引数を削除
       index++;
       if (index >= text.length) {
         clearInterval(interval);
