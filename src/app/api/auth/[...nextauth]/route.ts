@@ -1,4 +1,4 @@
-// src/app/api/auth/[...nextauth]/route.ts
+// frontend/src/app/api/auth/[...nextauth]/route.ts
 
 import NextAuth from "next-auth";
 import { authOptions } from "../../../../lib/authOptions"; // パスはプロジェクトに合わせて調整してください

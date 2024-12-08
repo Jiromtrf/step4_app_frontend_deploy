@@ -1,4 +1,4 @@
-// src/lib/authOptions.ts
+// frontend/src/lib/authOptions.ts
 
 import { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
@@ -35,7 +35,7 @@ export const authOptions: AuthOptions = {
           } else {
             throw new Error("Authentication failed");
           }
-        } catch (error) {
+        } catch (error: unknown) {
           console.error("Authorization error:", error);
 
           if (axios.isAxiosError(error)) {
