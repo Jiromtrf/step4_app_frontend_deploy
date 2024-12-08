@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@geist-ui/core": "^2.3.8",
     "axios": "^1.7.8",
     "next": "15.0.2",
     "next-auth": "^4.24.10",
