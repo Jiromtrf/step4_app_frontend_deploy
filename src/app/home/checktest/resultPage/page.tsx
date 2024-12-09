@@ -1,10 +1,12 @@
+// frontend/src/app/home/checktest/resultPage/page.tsx
 "use client";
 
 export const dynamic = "force-dynamic";
 
 import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
-export default function ResultPage() {
+function ResultPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const scoreParam = searchParams.get("score");
@@ -35,5 +37,13 @@ export default function ResultPage() {
                 </button>
             </div>
         </div>
+    );
+}
+
+export default function ResultPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <ResultPageContent />
+        </Suspense>
     );
 }
