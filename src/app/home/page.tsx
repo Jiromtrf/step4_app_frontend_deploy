@@ -39,7 +39,7 @@ const Home: React.FC = () => {
 
   const fetchMessages = useCallback(async () => {
     try {
-      const response = await axios.get<{data: MessageData[]}>('http://localhost:8000/get_messages/');
+      const response = await axios.get<{data: MessageData[]}>('https://tech0-gen-7-step4-studentwebapp-pos-2-g7czbec8g5amg9hv.eastus-01.azurewebsites.net/get_messages/');
       setMessages(response.data.data);
     } catch (err: unknown) {
       setError('メッセージの取得に失敗しました');
@@ -54,7 +54,7 @@ const Home: React.FC = () => {
   const sendMessage = useCallback(async () => {
     if (message.trim() === '') return;
     try {
-      const response = await axios.post('http://localhost:8000/send_message/', { text: message });
+      const response = await axios.post('https://tech0-gen-7-step4-studentwebapp-pos-2-g7czbec8g5amg9hv.eastus-01.azurewebsites.net/send_message/', { text: message });
       console.log('Message sent:', response.data);
       setMessage('');
       fetchMessages();
