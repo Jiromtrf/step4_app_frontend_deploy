@@ -1,8 +1,9 @@
+// frontend/src/app/home/checktest/questionPage/page.tsx
 "use client";
 
 export const dynamic = "force-dynamic";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 interface Quiz {
@@ -15,7 +16,7 @@ interface Quiz {
     date: string;
 }
 
-export default function QuestionPage() {
+function QuestionPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const date = searchParams.get("date") || "";
@@ -51,6 +52,9 @@ export default function QuestionPage() {
                     setError(err.message);
                     setIsLoading(false);
                 });
+        } else {
+            // date, categoryが無い場合も読み込み完了として扱う
+            setIsLoading(false);
         }
     }, [date, category]);
 
@@ -61,17 +65,14 @@ export default function QuestionPage() {
         const correctAudio = new Audio("/audio/OK.mp3");
         const incorrectAudio = new Audio("/audio/NG.mp3");
 
-        if (index === questions[currentQuestionIndex].correct_index) {
+        if (questions[currentQuestionIndex]?.correct_index === index) {
             correctAudio.play();
-
             if (!correctQuestions.includes(questions[currentQuestionIndex].id)) {
                 setScore(prevScore => prevScore + 1);
                 setCorrectQuestions(prev => [...prev, questions[currentQuestionIndex].id]);
             }
         } else {
-
             incorrectAudio.play();
-
             if (!incorrectQuestions.includes(questions[currentQuestionIndex].id)) {
                 setIncorrectQuestions(prev => [...prev, questions[currentQuestionIndex].id]);
             }
@@ -161,5 +162,13 @@ export default function QuestionPage() {
                 </button>
             </div>
         </div>
+    );
+}
+
+export default function QuestionPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <QuestionPageContent />
+        </Suspense>
     );
 }

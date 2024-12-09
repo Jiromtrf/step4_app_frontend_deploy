@@ -5,8 +5,8 @@
 import "./globals.css";
 import { GeistProvider } from "@geist-ui/core";
 import SessionProviderWrapper from "./SessionProviderWrapper";
-// 未使用のフォントインポートを削除
-// import { geistSans, geistMono } from "../fonts";
+
+export const dynamic = "force-dynamic"; // 追加
 
 export default function RootLayout({
   children,
