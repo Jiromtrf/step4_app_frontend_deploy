@@ -192,7 +192,7 @@ export default function Teaming() {
         const unfilledRoles = ["PdM", "Biz", "Tech", "Design"].filter(r => !roles[r as keyof Roles]);
 
         const recommended = response.data.data.filter((u: User) => {
-          return u.orientations && unfilledRoles.some(r => u.orientations.includes(r));
+          return (u.orientations ?? []).length > 0 && unfilledRoles.some(r => (u.orientations ?? []).includes(r));
         }).map((u: User) => u.user_id);
 
         setRecommendedUsers(recommended);
