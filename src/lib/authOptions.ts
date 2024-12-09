@@ -59,7 +59,7 @@ export const authOptions: AuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.accessToken = user.accessToken; // JWTトークンに accessToken を追加
-        token.id = user.id; // ユーザーIDを追加
+        token.id = user.id ? String(user.id) : null; // ユーザーIDを追加
         token.name = user.name; // ユーザー名を追加
       }
       return token;
