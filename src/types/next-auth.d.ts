@@ -1,7 +1,7 @@
 // frontend/src/types/next-auth.d.ts
 
 import { DefaultUser } from "next-auth";
-import { JWT } from "next-auth/jwt";
+// import { JWT } from "next-auth/jwt";  // <- これを削除
 
 declare module "next-auth" {
   interface Session {
