@@ -39,34 +39,55 @@ const Home: React.FC = () => {
 
   const fetchMessages = useCallback(async () => {
     try {
-      const response = await axios.get<{data: MessageData[]}>('https://tech0-gen-7-step4-studentwebapp-pos-2-g7czbec8g5amg9hv.eastus-01.azurewebsites.net/get_messages/');
-      setMessages(response.data.data);
-    } catch (err: unknown) {
-      setError('メッセージの取得に失敗しました');
-      if (axios.isAxiosError(err)) {
-        console.error('Error retrieving messages:', err.response?.data || err.message);
-      } else {
-        console.error('Error retrieving messages:', (err as Error).message);
-      }
-    }
-  }, []);
+        // 環境変数からAPIのベースURLを取得
+        const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
+        if (!baseURL) {
+            throw new Error('NEXT_PUBLIC_API_BASE_URL is not defined in environment variables');
+        }
 
-  const sendMessage = useCallback(async () => {
+        // 完全なURLを作成
+        const url = `${baseURL}/get_messages/`;
+
+        // APIリクエスト
+        const response = await axios.get<{ data: MessageData[] }>(url);
+        setMessages(response.data.data);
+    } catch (err: unknown) {
+        setError('メッセージの取得に失敗しました');
+        if (axios.isAxiosError(err)) {
+            console.error('Error retrieving messages:', err.response?.data || err.message);
+        } else {
+            console.error('Error retrieving messages:', (err as Error).message);
+        }
+    }
+}, []);
+
+const sendMessage = useCallback(async () => {
     if (message.trim() === '') return;
     try {
-      const response = await axios.post('https://tech0-gen-7-step4-studentwebapp-pos-2-g7czbec8g5amg9hv.eastus-01.azurewebsites.net/send_message/', { text: message });
-      console.log('Message sent:', response.data);
-      setMessage('');
-      fetchMessages();
+        // 環境変数からAPIのベースURLを取得
+        const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
+        if (!baseURL) {
+            throw new Error('NEXT_PUBLIC_API_BASE_URL is not defined in environment variables');
+        }
+
+        // 完全なURLを作成
+        const url = `${baseURL}/send_message/`;
+
+        // メッセージ送信リクエスト
+        const response = await axios.post(url, { text: message });
+        console.log('Message sent:', response.data);
+        setMessage('');
+        fetchMessages();
     } catch (err: unknown) {
-      setError('メッセージの送信に失敗しました');
-      if (axios.isAxiosError(err)) {
-        console.error('Error sending message:', err.response?.data || err.message);
-      } else {
-        console.error('Error sending message:', (err as Error).message);
-      }
+        setError('メッセージの送信に失敗しました');
+        if (axios.isAxiosError(err)) {
+            console.error('Error sending message:', err.response?.data || err.message);
+        } else {
+            console.error('Error sending message:', (err as Error).message);
+        }
     }
-  }, [message, fetchMessages]);
+}, [message, fetchMessages]);
+
 
   const typeWriterEffect = useCallback((text: string, delay: number = 80) => {
     let index = 0;

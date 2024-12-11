@@ -19,3 +19,90 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* 背景のスタイル */
+.background {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #ffd1dc, #b5fffc);
+  font-family: "Hachi Maru Pop", cursive;
+  position: relative;
+  overflow: hidden;
+}
+
+/* カードのスタイル */
+.card {
+  z-index: 1;
+  width: 100%;
+  max-width: 400px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+/* タイトルとサブタイトル */
+.title {
+  margin-bottom: 20px;
+  font-size: 2.5em;
+  font-weight: bold;
+  color: #ff69b4;
+  text-shadow: 2px 2px #ffb6c1;
+}
+
+.subtitle {
+  margin-bottom: 20px;
+  font-size: 1em;
+  color: #555;
+}
+
+.error-message {
+  color: red;
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+/* 入力欄のスタイル */
+.input {
+  padding: 15px;
+  border-radius: 12px;
+  border: 2px solid #ffb6c1;
+  background-color: #fff;
+  color: #333;
+  font-size: 1em;
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+/* ボタンのスタイル */
+.button {
+  padding: 15px;
+  border-radius: 30px;
+  font-size: 1.2em;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+  width: 100%;
+}
+
+.login-button {
+  background: linear-gradient(90deg, #ff8c00, #ffd700);
+  color: #fff;
+  border: none;
+}
+
+.signup-button {
+  margin-top: 15px;
+  background: linear-gradient(90deg, #00bfff, #1e90ff);
+  color: #fff;
+  border: none;
+}
+
+.button:hover {
+  transform: scale(1.05);
+}
