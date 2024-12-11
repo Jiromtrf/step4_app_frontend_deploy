@@ -70,7 +70,7 @@ const ClientComponent: React.FC<ClientComponentProps> = ({ initialMessages }) =>
     >
       {/* 人物画像 (画面下部に固定) */}
       <Image
-        src="/gal1.webp"
+        src="/girl1.webp"
         alt="Girl"
         fill // 'fill' プロパティを使用
         unoptimized // 画像最適化を無効化
