@@ -73,6 +73,7 @@ const ClientComponent: React.FC<ClientComponentProps> = ({ initialMessages }) =>
         src="/girl1.png"
         alt="Girl"
         fill // 'fill' プロパティを使用
+        unoptimized // 画像最適化を無効化
         style={{
             objectFit: 'contain', // スタイルとして指定
             position: 'absolute',
