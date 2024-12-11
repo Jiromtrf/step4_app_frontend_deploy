@@ -33,7 +33,7 @@ const ClientComponent: React.FC<ClientComponentProps> = ({ initialMessages }) =>
   const updateGreetingMessageAndBackground = () => {
     const currentHour = new Date().getHours();
     const messages = {
-      morning: ['おはよー！朝から頑張って偉いね！', '/morning.webp'],
+      morning: ['おはよー！朝から頑張って偉いね！', '/girl1.png'],
       afternoon: ['やっほー！今日も頑張ろう！', '/afternoon.webp'],
       evening: ['ここからがコアタイムだねー！', '/evening.webp'],
       night: ['遅くまでえらいねー。もうひとふんばり！', '/night.webp'],
