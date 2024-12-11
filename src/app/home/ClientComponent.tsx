@@ -72,9 +72,9 @@ const ClientComponent: React.FC<ClientComponentProps> = ({ initialMessages }) =>
       <Image
         src="/girl1.png"
         alt="Girl"
-        layout="fill" // 親要素に対して相対的なレイアウト
-        objectFit="contain" // 縦横比を維持
+        fill // 'fill' プロパティを使用
         style={{
+            objectFit: 'contain', // スタイルとして指定
             position: 'absolute',
             bottom: 0,
             left: '50%',
@@ -83,6 +83,7 @@ const ClientComponent: React.FC<ClientComponentProps> = ({ initialMessages }) =>
             pointerEvents: 'none',
         }}
         />
+
 
       {/* サイドバー */}
       <div className={`${styles.sidebar} ${isSidebarVisible ? styles.sidebarVisible : styles.sidebarHidden}`}>
