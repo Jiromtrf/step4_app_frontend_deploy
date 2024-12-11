@@ -1,12 +1,13 @@
 .container {
-    display: flex;
-    height: 100vh;
-    background-image: url('/gal1.webp');
-    background-size: cover;
-    background-position: center;
-    color: #fff;
-    position: relative;
-  }
+  display: flex;
+  height: 100vh;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  color: #fff;
+  overflow: hidden;
+}
+
   
   .sidebar {
     width: 250px;
@@ -14,7 +15,7 @@
     padding: 40px;
     transition: transform 0.3s ease;
     position: relative;
-    z-index: 1;
+    z-index: 2;
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2); /* サイドバーにシャドウを追加 */
     border-radius: 0 8px 8px 0; /* サイドバー右側に丸みを追加 */
   }
@@ -74,10 +75,11 @@
     background-color: #ffcc00;
     color: #000;
     cursor: pointer;
-    z-index: 2;
+    z-index: 3;
     border: none;
     border-radius: 0 4px 4px 0;
     padding: 0;
+    z-index: 2;
   }
   
   .content {
@@ -95,6 +97,8 @@
     padding: 10px;
     border-radius: 8px;
     margin-bottom: 10px;
+    z-index: 2;
+    
   }
   
   .input {
@@ -123,6 +127,7 @@
     padding: 20px;
     border-radius: 8px;
     margin-bottom: 20px;
+    z-index: 2;
   }
   
   .messageList {
