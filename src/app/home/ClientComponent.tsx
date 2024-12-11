@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from '../page.module.css'; // 修正済みパス
+import Image from 'next/image';
 import SignoutButton from '../components/SignoutButton';
 
 interface Message {
@@ -19,7 +20,7 @@ interface ClientComponentProps {
 }
 
 const ClientComponent: React.FC<ClientComponentProps> = ({ initialMessages }) => {
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
+  const [messages] = useState<Message[]>(initialMessages);
   const [message, setMessage] = useState<string>('');
   const [greetingMessage, setGreetingMessage] = useState<string>('');
   const [backgroundImage, setBackgroundImage] = useState<string>('/gal1.webp');
@@ -68,21 +69,20 @@ const ClientComponent: React.FC<ClientComponentProps> = ({ initialMessages }) =>
       }}
     >
       {/* 人物画像 (画面下部に固定) */}
-      <img
+      <Image
         src="/girl1.png"
         alt="Girl"
+        layout="fill" // 親要素に対して相対的なレイアウト
+        objectFit="contain" // 縦横比を維持
         style={{
-          position: 'absolute', // スクロールは想定せず、画面サイズの変更のみ対応
-          bottom: 0, // 画面下部に固定
-          left: '50%',
-          transform: 'translateX(-50%)', // 中央揃え
-          height: '800px',
-          width: '1600px', // 幅を画面いっぱいに超えるサイズ
-          objectFit: 'contain', // 縦横比を維持
-          zIndex: 0, // 他のコンポーネントの背面に配置
-          pointerEvents: 'none', // クリック操作を無効化
+            position: 'absolute',
+            bottom: 0,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 0,
+            pointerEvents: 'none',
         }}
-      />
+        />
 
       {/* サイドバー */}
       <div className={`${styles.sidebar} ${isSidebarVisible ? styles.sidebarVisible : styles.sidebarHidden}`}>
