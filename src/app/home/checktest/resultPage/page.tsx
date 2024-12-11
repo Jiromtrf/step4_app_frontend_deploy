@@ -1,16 +1,13 @@
 // frontend/src/app/home/checktest/resultPage/page.tsx
 "use client";
 
-export const dynamic = "force-dynamic";
-
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect, Suspense } from "react";
 
-export default function ResultPage() {
+// Suspense 内で使用するコンテンツを別コンポーネントとして定義
+function ResultPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const audioRef = useRef<HTMLAudioElement | null>(null);
-
     const scoreParam = searchParams.get("score");
     const totalParam = searchParams.get("total");
 
@@ -22,8 +19,8 @@ export default function ResultPage() {
         router.push("/home");
     };
 
+    // パーセンテージに基づいてサウンドを再生
     useEffect(() => {
-        // 初回ロード時に音声を準備
         let audioSrc = "";
         if (percentage >= 80) {
             audioSrc = "/success.mp3"; // 高得点用
@@ -33,17 +30,11 @@ export default function ResultPage() {
             audioSrc = "/try_again.mp3"; // 低得点用
         }
 
-        // Audio オブジェクトを作成
-        audioRef.current = new Audio(audioSrc);
-        audioRef.current.load();
-
-        // 結果表示時に自動再生
-        audioRef.current
-            .play()
-            .catch((err) => console.error("自動再生エラー:", err));
+        const audio = new Audio(audioSrc);
+        audio.play();
     }, [percentage]);
 
-    // Determine message based on percentage
+    // パーセンテージに基づいてメッセージを表示
     const getMessage = () => {
         if (percentage >= 80) {
             return "素晴らしい！高得点おめでとうございます！🎉";
@@ -75,5 +66,15 @@ export default function ResultPage() {
                 </button>
             </div>
         </div>
+    );
+}
+
+export const dynamic = "force-dynamic";
+
+export default function ResultPage() {
+    return (
+        <Suspense fallback={<div>読み込み中...</div>}>
+            <ResultPageContent />
+        </Suspense>
     );
 }
