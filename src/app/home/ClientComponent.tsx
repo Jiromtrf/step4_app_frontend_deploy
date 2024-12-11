@@ -33,7 +33,7 @@ const ClientComponent: React.FC<ClientComponentProps> = ({ initialMessages }) =>
   const updateGreetingMessageAndBackground = () => {
     const currentHour = new Date().getHours();
     const messages = {
-      morning: ['おはよー！朝から頑張って偉いね！', '/girl1.png'],
+      morning: ['おはよー！朝から頑張って偉いね！', '/morning.webp'],
       afternoon: ['やっほー！今日も頑張ろう！', '/afternoon.webp'],
       evening: ['ここからがコアタイムだねー！', '/evening.webp'],
       night: ['遅くまでえらいねー。もうひとふんばり！', '/night.webp'],
@@ -70,7 +70,7 @@ const ClientComponent: React.FC<ClientComponentProps> = ({ initialMessages }) =>
     >
       {/* 人物画像 (画面下部に固定) */}
       <Image
-        src="/girl1.png"
+        src="/gal1.webp"
         alt="Girl"
         fill // 'fill' プロパティを使用
         unoptimized // 画像最適化を無効化
