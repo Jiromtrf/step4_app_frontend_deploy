@@ -4,11 +4,13 @@
 export const dynamic = "force-dynamic";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function ResultPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const audioRef = useRef<HTMLAudioElement | null>(null);
+
     const scoreParam = searchParams.get("score");
     const totalParam = searchParams.get("total");
 
@@ -20,8 +22,8 @@ export default function ResultPage() {
         router.push("/home");
     };
 
-    // Play sound based on percentage
     useEffect(() => {
+        // 初回ロード時に音声を準備
         let audioSrc = "";
         if (percentage >= 80) {
             audioSrc = "/success.mp3"; // 高得点用
@@ -31,8 +33,14 @@ export default function ResultPage() {
             audioSrc = "/try_again.mp3"; // 低得点用
         }
 
-        const audio = new Audio(audioSrc);
-        audio.play();
+        // Audio オブジェクトを作成
+        audioRef.current = new Audio(audioSrc);
+        audioRef.current.load();
+
+        // 結果表示時に自動再生
+        audioRef.current
+            .play()
+            .catch((err) => console.error("自動再生エラー:", err));
     }, [percentage]);
 
     // Determine message based on percentage
@@ -69,4 +77,3 @@ export default function ResultPage() {
         </div>
     );
 }
-
