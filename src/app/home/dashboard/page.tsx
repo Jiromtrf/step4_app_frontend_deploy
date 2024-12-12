@@ -180,7 +180,7 @@ export default function Dashboard() {
             </select>
           </div>
 
-          <RadarChart skills={skills} goals={roles[role]} />
+          <RadarChart skills={skills} goals={roles[role]} stepSize={20} />
         </div>
       </div>
     </div>

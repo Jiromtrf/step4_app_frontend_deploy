@@ -18,20 +18,36 @@ interface Skills {
 }
 
 interface RadarChartProps {
-  skills?: Skills; // オプショナルに変更
-  goals?: Skills;  // オプショナルに変更
+  skills?: Skills;
+  goals?: Skills;
+  mode?: "individual" | "team";
+  stepSize?: number;
+  labels?: { goals: string; skills: string }; // 凡例を指定するプロパティ
 }
 
-export default function RadarChart({ skills, goals }: RadarChartProps) {
-  // デフォルト値を設定
+export default function RadarChart({
+  skills,
+  goals,
+  mode = "individual",
+  stepSize = 20,
+  labels = { goals: "目標値", skills: "あなたの能力値" }, // デフォルト値を設定
+}: RadarChartProps) {
   const defaultSkills = { biz: 0, design: 0, tech: 0 };
-  const defaultGoals = { biz: 50, design: 50, tech: 50 }; // デフォルト目標値
+  const defaultGoals = { biz: 50, design: 50, tech: 50 };
+
+  const maxScale = mode === "team" 
+    ? Math.max(
+        skills?.biz || 0,
+        skills?.design || 0,
+        skills?.tech || 0
+      ) + stepSize // 余白を持たせる
+    : 100;
 
   const data = {
     labels: ["Biz", "Design", "Tech"],
     datasets: [
       {
-        label: "目標値",
+        label: labels.goals, // 目標値の凡例
         data: [
           goals?.biz ?? defaultGoals.biz,
           goals?.design ?? defaultGoals.design,
@@ -42,7 +58,7 @@ export default function RadarChart({ skills, goals }: RadarChartProps) {
         borderWidth: 1,
       },
       {
-        label: "あなたの能力値",
+        label: labels.skills, // 能力値の凡例
         data: [
           skills?.biz ?? defaultSkills.biz,
           skills?.design ?? defaultSkills.design,
@@ -61,9 +77,9 @@ export default function RadarChart({ skills, goals }: RadarChartProps) {
     scales: {
       r: {
         min: 0,
-        max: 100,
+        max: maxScale,
         ticks: {
-          stepSize: 20,
+          stepSize: stepSize,
           color: "#333333",
           backdropColor: "#ffffff",
         },

@@ -39,6 +39,14 @@ interface ChartData {
   tech: number;
 }
 
+// 学習フェーズごとの目標値
+const phaseGoals = {
+  step1: { biz: 100, design: 80, tech: 60 },
+  step2: { biz: 150, design: 120, tech: 100 },
+  step3: { biz: 200, design: 160, tech: 140 },
+  step4: { biz: 250, design: 200, tech: 180 },
+};
+
 export default function Teaming() {
   const { data: session } = useSession();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -49,6 +57,13 @@ export default function Teaming() {
     Design: null,
   });
   const [chartData, setChartData] = useState<ChartData>({ biz: 0, design: 0, tech: 0 });
+
+  // 現在の学習フェーズ（初期値はステップ1）
+  const [currentPhase, setCurrentPhase] = useState<keyof typeof phaseGoals>("step1");
+
+  // 現在のフェーズに基づく目標値
+  const [teamGoals, setTeamGoals] = useState(phaseGoals[currentPhase]);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchFilters, setSearchFilters] = useState({
     name: "",
@@ -73,6 +88,11 @@ export default function Teaming() {
       Modal.setAppElement('body');
     }
   }, []);
+
+  // 現在の学習フェーズが変更されたときに目標値を更新
+  useEffect(() => {
+    setTeamGoals(phaseGoals[currentPhase]);
+  }, [currentPhase]);
 
   const fetchCurrentUser = useCallback(async () => {
     try {
@@ -125,7 +145,7 @@ export default function Teaming() {
         if (currentValue === null) {
           newRoles[r] = member;
         } else if (Array.isArray(currentValue)) {
-          currentValue.push(member);
+          newRoles[r].push(member);
         } else {
           newRoles[r] = [currentValue, member];
         }
@@ -169,7 +189,7 @@ export default function Teaming() {
     });
 
     if (isUserInAnyRole) {
-      if (confirm("現在あなたは他の役割に登録されています。それでも新規メンバーを検索しますか？")) {
+      if (confirm("新規メンバーを検索しますか？")) {
         setSelectedRole(role);
         setIsModalOpen(true);
       }
@@ -309,6 +329,22 @@ export default function Teaming() {
       </aside>
 
       <main className={styles.main}>
+        {/* 学習フェーズのドロップダウンを追加 */}
+        <div className={styles.phaseSelector}>
+          <label htmlFor="phase-select">学習フェーズ: </label>
+          <select
+            id="phase-select"
+            value={currentPhase}
+            onChange={(e) => setCurrentPhase(e.target.value as keyof typeof phaseGoals)}
+          >
+            {Object.keys(phaseGoals).map((phase) => (
+              <option key={phase} value={phase}>
+                {phase.toUpperCase()}
+              </option>
+            ))}
+          </select>
+        </div>
+
         {currentTeamId ? (
           <>
             <div className={styles.roles}>
@@ -359,7 +395,13 @@ export default function Teaming() {
             </div>
 
             <div className={styles.chartContainer}>
-              <RadarChart skills={chartData} />
+              <RadarChart
+                skills={chartData}
+                goals={teamGoals}
+                mode="team"
+                stepSize={50} // チーム用にstepSizeを50に設定
+                labels={{ goals: "目標値", skills: "チームの能力値" }} // 凡例を変更
+              />
             </div>
           </>
         ) : (
