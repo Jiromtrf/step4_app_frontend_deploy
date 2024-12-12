@@ -131,7 +131,7 @@
 .member button {
   margin-top: 5px; /* 名前とボタンの間の余白 */
   padding: 5px 10px;
-  background-color: #9488ed;
+  background-color: #6789ee;
   color: white;
   border: none;
   border-radius: 5px;
@@ -140,7 +140,7 @@
 }
 
 .member button:hover {
-  background-color: #ff7875; /* ホバー時の背景色 */
+  background-color: #7895ed; /* ホバー時の背景色 */
 }
 
 .overlay {

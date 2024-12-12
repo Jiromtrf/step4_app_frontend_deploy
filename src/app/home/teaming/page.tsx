@@ -145,7 +145,7 @@ export default function Teaming() {
         if (currentValue === null) {
           newRoles[r] = member;
         } else if (Array.isArray(currentValue)) {
-          newRoles[r].push(member);
+          (newRoles[r] as User[]).push(member); // 型アサーションを追加
         } else {
           newRoles[r] = [currentValue, member];
         }
