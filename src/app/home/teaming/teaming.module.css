@@ -60,12 +60,17 @@
   font-weight: bold;
   padding: 10px;
   border-radius: 10px 10px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .addButton {
-  font-size: 2rem;
+  font-size: 1.5rem;
   cursor: pointer;
   color: gray;
+  background: none;
+  border: none;
 }
 
 .roleDetails p {
@@ -173,11 +178,59 @@
   gap: 10px;
 }
 
-.searchResults {
-  margin-top: 20px;
+/* 新たに追加されたクラス */
+
+.filterGroup {
   display: flex;
-  flex-direction: column;
-  gap: 15px;
+  align-items: center;
+  gap: 10px;
+}
+
+.filterGroup label {
+  width: 100px;
+  font-weight: bold;
+}
+
+.filterGroup select,
+.filterGroup input {
+  flex: 1;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.resetButton {
+  background-color: #ff4d4f;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.resetButton:hover {
+  background-color: #ff7875;
+}
+
+.searchActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.resetAllButton {
+  background-color: #ff4d4f;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.resetAllButton:hover {
+  background-color: #ff7875;
 }
 
 .searchResult {
@@ -197,6 +250,10 @@
   border: 1px solid #ccc;
 }
 
+.userInfo {
+  flex: 1;
+}
+
 .recommended {
   background: #ffcc00;
   color: #000;
@@ -206,19 +263,58 @@
   margin-left: 10px;
 }
 
-.phaseSelector {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
+.addButton {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.addButton:hover {
+  background-color: #45a049;
+}
+
+.closeButton {
+  background-color: #ff4d4f;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: background-color 0.3s ease;
+}
+
+.closeButton:hover {
+  background-color: #ff7875;
+}
+
+.teamNameInput {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
   margin-bottom: 20px;
 }
 
-.phaseSelector label {
-  margin-right: 10px;
-  font-weight: bold;
+.createTeamActions {
+  display: flex;
+  gap: 10px;
 }
 
-.phaseSelector select {
-  padding: 5px;
-  font-size: 16px;
+.createButton {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.createButton:hover {
+  background-color: #45a049;
 }

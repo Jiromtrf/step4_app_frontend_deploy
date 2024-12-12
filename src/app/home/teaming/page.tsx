@@ -67,8 +67,8 @@ export default function Teaming() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchFilters, setSearchFilters] = useState({
     name: "",
-    specialties: [] as string[],
-    orientations: [] as string[],
+    specialties: [] as string[],      // 配列に戻す
+    orientations: [] as string[],     // 配列に戻す
   });
   const [searchResults, setSearchResults] = useState<User[]>([]);
   const [recommendedUsers, setRecommendedUsers] = useState<number[]>([]);
@@ -201,7 +201,14 @@ export default function Teaming() {
 
   const handleSearch = useCallback(async () => {
     try {
-      const response = await axios.post<{data: User[]}>(`${baseUrl}/api/user/search`, searchFilters, {
+      // フィルターが空の場合、全ユーザーを取得するために必要な処理を行う
+      const filters = {
+        name: searchFilters.name.trim() === "" ? undefined : searchFilters.name,
+        specialties: searchFilters.specialties.length > 0 ? searchFilters.specialties : undefined,
+        orientations: searchFilters.orientations.length > 0 ? searchFilters.orientations : undefined,
+      };
+
+      const response = await axios.post<{data: User[]}>(`${baseUrl}/api/user/search`, filters, {
         headers: {
           Authorization: `Bearer ${session?.accessToken}`,
         },
@@ -315,6 +322,15 @@ export default function Teaming() {
     }
   }, [baseUrl, fetchTeamInfo, newTeamName, session?.accessToken]);
 
+  // リセットボタンのハンドラー
+  const handleResetFilters = useCallback(() => {
+    setSearchFilters({
+      name: "",
+      specialties: [],
+      orientations: [],
+    });
+  }, []);
+
   return (
     <div className={styles.container}>
       <aside className={styles.sidebar}>
@@ -423,51 +439,81 @@ export default function Teaming() {
       >
         <h2>メンバーを追加</h2>
         <div className={styles.searchFilters}>
-          <input
-            type="text"
-            placeholder="名前で検索"
-            value={searchFilters.name}
-            onChange={(e) => setSearchFilters({ ...searchFilters, name: e.target.value })}
-          />
-          <select
-            multiple
-            value={searchFilters.specialties}
-            onChange={(e) => {
-              const options = e.target.options;
-              const selected: string[] = [];
-              for (let i = 0; i < options.length; i++) {
-                if (options[i].selected) {
-                  selected.push(options[i].value);
-                }
-              }
-              setSearchFilters({ ...searchFilters, specialties: selected });
-            }}
-          >
-            <option value="Tech">Tech</option>
-            <option value="Design">Design</option>
-            <option value="Biz">Biz</option>
-          </select>
-          <select
-            multiple
-            value={searchFilters.orientations}
-            onChange={(e) => {
-              const options = e.target.options;
-              const selected: string[] = [];
-              for (let i = 0; i < options.length; i++) {
-                if (options[i].selected) {
-                  selected.push(options[i].value);
-                }
-              }
-              setSearchFilters({ ...searchFilters, orientations: selected });
-            }}
-          >
-            <option value="Tech">Tech</option>
-            <option value="Design">Design</option>
-            <option value="Biz">Biz</option>
-            <option value="PdM">PdM</option>
-          </select>
-          <button onClick={handleSearch}>検索</button>
+          {/* 名前検索 */}
+          <div className={styles.filterGroup}>
+            <label htmlFor="search-name">名前で検索:</label>
+            <input
+              type="text"
+              id="search-name"
+              placeholder="名前で検索"
+              value={searchFilters.name}
+              onChange={(e) => setSearchFilters({ ...searchFilters, name: e.target.value })}
+            />
+          </div>
+
+          {/* 得意分野 */}
+          <div className={styles.filterGroup}>
+            <label htmlFor="search-specialties">得意分野:</label>
+            <select
+              id="search-specialties"
+              value={searchFilters.specialties[0] || ""}
+              onChange={(e) => {
+                const value = e.target.value;
+                setSearchFilters({ 
+                  ...searchFilters, 
+                  specialties: value ? [value] : [] 
+                });
+              }}
+            >
+              <option value="">すべて</option> {/* リセット用 */}
+              <option value="Tech">Tech</option>
+              <option value="Design">Design</option>
+              <option value="Biz">Biz</option>
+            </select>
+            <button 
+              onClick={() => setSearchFilters({ ...searchFilters, specialties: [] })} 
+              className={styles.resetButton}
+            >
+              リセット
+            </button>
+          </div>
+
+          {/* 志向性 */}
+          <div className={styles.filterGroup}>
+            <label htmlFor="search-orientations">志向性:</label>
+            <select
+              id="search-orientations"
+              value={searchFilters.orientations[0] || ""}
+              onChange={(e) => {
+                const value = e.target.value;
+                setSearchFilters({ 
+                  ...searchFilters, 
+                  orientations: value ? [value] : [] 
+                });
+              }}
+            >
+              <option value="">すべて</option> {/* リセット用 */}
+              <option value="Tech">Tech</option>
+              <option value="Design">Design</option>
+              <option value="Biz">Biz</option>
+              <option value="PdM">PdM</option>
+            </select>
+            <button 
+              onClick={() => setSearchFilters({ ...searchFilters, orientations: [] })} 
+              className={styles.resetButton}
+            >
+              リセット
+            </button>
+          </div>
+
+          {/* 検索ボタンと全てリセットボタン */}
+          <div className={styles.searchActions}>
+            <button onClick={handleSearch}>検索</button>
+            <button onClick={handleResetFilters} className={styles.resetAllButton}>全てリセット</button>
+          </div>
         </div>
+
+        {/* 検索結果 */}
         <div className={styles.searchResults}>
           {searchResults.map((user) => (
             <div key={user.user_id} className={styles.searchResult}>
@@ -478,7 +524,7 @@ export default function Teaming() {
                 width={50}
                 height={50}
               />
-              <div>
+              <div className={styles.userInfo}>
                 <p><strong>{user.name}</strong></p>
                 <p>
                   得意分野:{" "}
@@ -500,12 +546,13 @@ export default function Teaming() {
                 </p>
               </div>
               {recommendedUsers.includes(user.user_id) && <span className={styles.recommended}>おすすめ</span>}
-              <button onClick={() => handleSelectUser(selectedRole, user)}>追加</button>
+              <button onClick={() => handleSelectUser(selectedRole, user)} className={styles.addButton}>
+                追加
+              </button>
             </div>
           ))}
-
         </div>
-        <button onClick={() => setIsModalOpen(false)}>閉じる</button>
+        <button onClick={() => setIsModalOpen(false)} className={styles.closeButton}>閉じる</button>
       </Modal>
 
       {/* チーム作成モーダル */}
@@ -522,9 +569,12 @@ export default function Teaming() {
           placeholder="チーム名を入力"
           value={newTeamName}
           onChange={(e) => setNewTeamName(e.target.value)}
+          className={styles.teamNameInput}
         />
-        <button onClick={handleCreateTeam}>作成</button>
-        <button onClick={() => setIsCreateTeamModalOpen(false)}>閉じる</button>
+        <div className={styles.createTeamActions}>
+          <button onClick={handleCreateTeam} className={styles.createButton}>作成</button>
+          <button onClick={() => setIsCreateTeamModalOpen(false)} className={styles.closeButton}>閉じる</button>
+        </div>
       </Modal>
     </div>
   );
