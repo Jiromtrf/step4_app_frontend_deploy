@@ -24,6 +24,29 @@ const roles: Record<Roles, Skills> = {
   Biz: { biz: 50, design: 20, tech: 20 },
 };
 
+const messages = {
+  sufficient: [
+    "これだけできてれば余裕じゃん！さすがにこのレベルになると、どんなチームでも引っ張っていけるって感じだね！次のステージに進んで、もっと自分を試してみよ！✨",
+    "天才じゃん！このまま全ロール制覇しちゃえよ！しかもただの天才じゃなくて、努力型の天才だから、未来めっちゃ明るいって！🔥",
+    "めっちゃ仕上がってるじゃん！ここまで来ると周りも頼りにしちゃうレベルだね。次のチャレンジではさらにスキルを見せつけて！✨",
+  ],
+  partial: [
+    "あと少しで完璧！『{不足スキル}』をもうちょっと鍛えたら、どんなプロジェクトでも即戦力確定だし、みんなが頼りたくなる存在になれるよ！💪",
+    "ココ頑張ればもう完成系だし！『{不足スキル}』をクリアすれば、きっと『{ロール}』でも輝ける！この勢いで一緒にがんばろ！🔥",
+    "その調子で攻めれば、すぐトップクラスだよ！『{不足スキル}』を少しずつでも成長させれば、間違いなく結果がついてくる！✨",
+  ],
+  mismatch: [
+    "今『{ロール}』を試してるけど、アナタの目標は『{指向性}』だよね！いろいろ試すのもいいけど、本命のために準備しておくのも忘れないでね！😊",
+    "いろいろチャレンジしてるのエモいけど、最終目標の『{指向性}』を目指すなら、ちょっとずつ戻る準備もしとこ！次のステップが楽になるよ！✨",
+    "どのロールでもいけそうだけど、最終目標は『{指向性}』だよね。そっちでも輝ける準備、そろそろ始めてみる？🔥",
+  ],
+  insufficient: [
+    "大丈夫、アナタのペースでいこ！スキルは一気に伸びるもんじゃないから、少しずつ『{不足スキル}』を伸ばせば確実に成長できる！努力してる姿、アタシが一番見てるからね！🌟",
+    "焦らなくてOK！今は『{不足スキル}』を1つ伸ばすだけで十分だし、それだけで確実にゴールに近づけるよ。小さな一歩が大きな変化を生むんだから！✨",
+    "スキルは積み重ねっしょ！今は挑戦してるだけでめちゃくちゃエライ！アタシはその努力をずっと応援してるから、一緒に頑張ろう！🙌",
+  ],
+};
+
 export default function Dashboard() {
   const { data: session, status } = useSession();
   const [skills, setSkills] = useState<Skills>({ biz: 0, design: 0, tech: 0 });
@@ -31,6 +54,7 @@ export default function Dashboard() {
   const [userName, setUserName] = useState<string>("");
   const [message, setMessage] = useState<string>("");
   const [selectedDate, setSelectedDate] = useState<string>(""); // 日付選択用
+  const [orientations, setOrientations] = useState<string[]>([]); // 初期値を空配列に設定
 
   useEffect(() => {
     if (session && session.accessToken) {
@@ -59,6 +83,18 @@ export default function Dashboard() {
           setUserName(data.name);
         })
         .catch((err) => console.error('Error fetching skills:', err.message));
+
+      // Fetch user orientations
+      fetch(`${baseUrl}/api/user/orientation`, {
+        headers: {
+          Authorization: `Bearer ${session.accessToken}`,
+        },
+      })
+        .then((res) => res.json())
+        .then((data: { orientations: string[] }) => {
+          setOrientations(data.orientations || []); // undefined対策で空配列をデフォルトに
+        })
+        .catch((err) => console.error("Error fetching orientations:", err.message));
     }
   }, [session, selectedDate]); // selectedDate変更時にも再フェッチ
 
@@ -68,17 +104,55 @@ export default function Dashboard() {
       skills.biz >= goals.biz &&
       skills.design >= goals.design &&
       skills.tech >= goals.tech;
-
+  
+    const areasToImprove: string[] = [];
+    if (skills.biz < goals.biz) areasToImprove.push("Biz");
+    if (skills.design < goals.design) areasToImprove.push("Design");
+    if (skills.tech < goals.tech) areasToImprove.push("Tech");
+  
+    const primaryOrientation = orientations?.[0] || null;
+  
+    let chosenMessage = "";
+  
+    // 能力達成のセリフを最初に追加
     if (isAboveGoals) {
-      setMessage(`今の能力なら十分、${role}の役割をやれるよ！`);
+      chosenMessage +=
+        messages.sufficient[
+          Math.floor(Math.random() * messages.sufficient.length)
+        ];
+    } else if (areasToImprove.length > 0) {
+      chosenMessage +=
+        messages.partial[
+          Math.floor(Math.random() * messages.partial.length)
+        ].replace("{不足スキル}", areasToImprove.join(", "));
     } else {
-      const areasToImprove = [];
-      if (skills.biz < goals.biz) areasToImprove.push("Biz");
-      if (skills.design < goals.design) areasToImprove.push("Design");
-      if (skills.tech < goals.tech) areasToImprove.push("Tech");
-      setMessage(`${areasToImprove.join("と")}をもう少し頑張ろう！`);
+      chosenMessage +=
+        messages.insufficient[
+          Math.floor(Math.random() * messages.insufficient.length)
+        ].replace("{不足スキル}", areasToImprove.join(", "));
     }
-  }, [role, skills]);
+  
+    // マッチ/ミスマッチのセリフを追加
+    if (primaryOrientation) {
+      if (primaryOrientation === role) {
+        // マッチ時のセリフ
+        chosenMessage +=
+          "\n\n" + // セリフを分けるため改行を追加
+          `今やってる『${role}』はアナタにピッタリ！目標と一致してるし、このままスキルを磨いて極めちゃおう！✨`;
+      } else {
+        // ミスマッチ時のセリフ
+        chosenMessage +=
+          "\n\n" +
+          messages.mismatch[
+            Math.floor(Math.random() * messages.mismatch.length)
+          ]
+            .replace("{指向性}", primaryOrientation)
+            .replace("{ロール}", role);
+      }
+    }
+  
+    setMessage(chosenMessage);
+  }, [role, skills, orientations]);
 
   if (status === "loading") {
     return <p>Loading...</p>;
