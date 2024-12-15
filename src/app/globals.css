@@ -106,3 +106,28 @@ body {
 .button:hover {
   transform: scale(1.05);
 }
+
+.note-toggle {
+  margin-top: 20px;
+  cursor: pointer;
+  color: #007bff;
+  font-weight: bold;
+  border: none;
+  background: none;
+  font-size: 1em;
+}
+
+.note {
+  margin-top: 10px;
+  padding: 10px;
+  background: #f0f8ff;
+  border: 1px solid #add8e6;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 0.9em;
+  color: #333;
+}
+
+.note-toggle:hover {
+  text-decoration: underline;
+}

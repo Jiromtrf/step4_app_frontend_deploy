@@ -245,7 +245,7 @@ export default function Page() {
         </div>
       )}
     </div>
-  ); // ← ここまでが return 文
+  );
 
-} // ← ここに閉じ括弧を追加
+}
 

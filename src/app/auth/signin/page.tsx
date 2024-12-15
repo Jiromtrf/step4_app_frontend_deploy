@@ -9,6 +9,7 @@ export default function SignIn() {
   const [user_id, setUserId] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
+  const [showNote, setShowNote] = useState<boolean>(false);
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -27,7 +28,7 @@ export default function SignIn() {
   };
 
   const handleSignUp = () => {
-    router.push("/home/maintenance"); // サインアップページへの遷移
+    router.push("/home/maintenance");
   };
 
   return (
@@ -61,6 +62,20 @@ export default function SignIn() {
       <button onClick={handleSignUp} className="button signup-button">
         新規登録
       </button>
+
+      {/* 開閉可能な注釈 */}
+      <button
+        className="note-toggle"
+        onClick={() => setShowNote((prev) => !prev)} // 状態をトグル
+      >
+        {showNote ? "注釈を隠す ▲" : "ログイン情報はこちら ▼"}
+      </button>
+      {showNote && (
+        <div className="note">
+          <p>ユーザーID: <b>1</b>または <b>2</b></p>
+          <p>パスワード: <b>password</b></p>
+        </div>
+      )}
     </div>
   );
 }
