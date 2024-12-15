@@ -136,11 +136,11 @@ const ClientComponent: React.FC<ClientComponentProps> = ({ initialMessages }) =>
         <h2>機能一覧</h2>
         <ul className={styles.sidebarList}>
           <li><Link href="/home/dashboard">ステータス確認</Link></li>
-          <li><a href="#">宿題の進捗</a></li>
-          <li><a href="#">講義資料</a></li>
+          <li><a href="https://www.notion.so/tech0-wiki/b3f8af9f46334ce3bf32b33a33931210?pvs=4">宿題の進捗</a></li>
+          <li><a href="https://www.notion.so/tech0-wiki/DB-d0fbb0915f00436da682a46420c22791?pvs=4">講義資料</a></li>
           <li><Link href="/home/checktest">理解度チェック</Link></li>
           <li><Link href="/home/maintenance">勉強する</Link></li>
-          <li><Link href="/home/maintenance">遊びに行く</Link></li>
+          <li><Link href="/home/breather">遊びに行く</Link></li>
           <li><Link href="/home/teaming">チーミング</Link></li>
           <li><SignoutButton /></li>
         </ul>
