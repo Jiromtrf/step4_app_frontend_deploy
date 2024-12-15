@@ -68,7 +68,7 @@ export default function SignIn() {
         className="note-toggle"
         onClick={() => setShowNote((prev) => !prev)} // 状態をトグル
       >
-        {showNote ? "注釈を隠す ▲" : "ログイン情報はこちら ▼"}
+        {showNote ? "閉じる ▲" : "ログイン情報はこちら ▼"}
       </button>
       {showNote && (
         <div className="note">
