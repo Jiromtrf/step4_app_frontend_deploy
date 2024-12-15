@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import styles from '../page.module.css'; // 修正済みパス
 import Image from 'next/image';
 import SignoutButton from '../components/SignoutButton';
+import { AiOutlineSwap } from 'react-icons/ai';
 
 interface Message {
   text: string;
@@ -26,6 +27,27 @@ const ClientComponent: React.FC<ClientComponentProps> = ({ initialMessages }) =>
   const [backgroundImage, setBackgroundImage] = useState<string>('/gal1.webp');
   const [isSidebarVisible, setSidebarVisible] = useState<boolean>(false);
   const [isMessagesVisible, setMessagesVisible] = useState<boolean>(true);
+  const [currentCharacter, setCurrentCharacter] = useState<string>('girl1.webp');
+  const [isFirstClick, setFirstClick] = useState<boolean>(true);
+
+  const girlAudio = useRef<HTMLAudioElement | null>(null);
+  const boyAudio = useRef<HTMLAudioElement | null>(null);
+  const firstClickAudio = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    // 音声オブジェクトを初期化
+    girlAudio.current = new Audio('/girl.mp3');
+    boyAudio.current = new Audio('/boy.mp3');
+    firstClickAudio.current = new Audio(
+      Math.random() > 0.5 ? '/お疲れ様です.mp3' : '/やっほー.mp3'
+    );
+
+    return () => {
+      girlAudio.current?.pause();
+      boyAudio.current?.pause();
+      firstClickAudio.current?.pause();
+    };
+  }, []);
 
   const toggleSidebar = () => setSidebarVisible(!isSidebarVisible);
   const toggleMessages = () => setMessagesVisible(!isMessagesVisible);
@@ -55,8 +77,31 @@ const ClientComponent: React.FC<ClientComponentProps> = ({ initialMessages }) =>
     updateGreetingMessageAndBackground();
   }, []);
 
+  const handlePageClick = () => {
+    if (isFirstClick) {
+      firstClickAudio.current?.play();
+      setFirstClick(false); // 2回目以降は再生しない
+    }
+  };
+
+  const toggleCharacter = () => {
+    if (currentCharacter === 'girl1.webp') {
+      girlAudio.current?.pause();
+      girlAudio.current!.currentTime = 0;
+      boyAudio.current?.play();
+    } else {
+      boyAudio.current?.pause();
+      boyAudio.current!.currentTime = 0;
+      girlAudio.current?.play();
+    }
+    setCurrentCharacter((prevCharacter) =>
+      prevCharacter === 'girl1.webp' ? 'Boy1.webp' : 'girl1.webp'
+    );
+  };
+
   return (
     <div
+      onClick={handlePageClick} // 初回クリック時の音声再生
       className={styles.container}
       style={{
         backgroundImage: `url(${backgroundImage})`,
@@ -68,22 +113,22 @@ const ClientComponent: React.FC<ClientComponentProps> = ({ initialMessages }) =>
         overflow: 'hidden',
       }}
     >
-      {/* 人物画像 (画面下部に固定) */}
+      {/* 人物画像 */}
       <Image
-        src="/girl1.webp"
-        alt="Girl"
-        fill // 'fill' プロパティを使用
-        unoptimized // 画像最適化を無効化
+        src={`/${currentCharacter}`}
+        alt="Character"
+        fill
+        unoptimized
         style={{
-            objectFit: 'contain', // スタイルとして指定
-            position: 'absolute',
-            bottom: 0,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            zIndex: 0,
-            pointerEvents: 'none',
+          objectFit: 'contain',
+          position: 'absolute',
+          bottom: 0,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 0,
+          pointerEvents: 'none',
         }}
-        />
+      />
 
 
       {/* サイドバー */}
@@ -94,8 +139,8 @@ const ClientComponent: React.FC<ClientComponentProps> = ({ initialMessages }) =>
           <li><a href="#">宿題の進捗</a></li>
           <li><a href="#">講義資料</a></li>
           <li><Link href="/home/checktest">理解度チェック</Link></li>
-          <li><a href="#">勉強する</a></li>
-          <li><a href="#">遊びに行く</a></li>
+          <li><Link href="/home/maintenance">勉強する</Link></li>
+          <li><Link href="/home/maintenance">遊びに行く</Link></li>
           <li><Link href="/home/teaming">チーミング</Link></li>
           <li><SignoutButton /></li>
         </ul>
@@ -107,7 +152,7 @@ const ClientComponent: React.FC<ClientComponentProps> = ({ initialMessages }) =>
 
       {/* コンテンツ */}
       <div className={styles.content}>
-        <div className={styles.greeting}>{greetingMessage}</div>
+        <div className={styles.greeting}>{greetingMessage || '...'}</div>
         <button onClick={toggleMessages} className={styles.messageToggleButton}>
           {isMessagesVisible ? 'メッセージ一覧を隠す' : 'メッセージ一覧を表示'}
         </button>
@@ -141,6 +186,31 @@ const ClientComponent: React.FC<ClientComponentProps> = ({ initialMessages }) =>
           <button className={styles.button}>送信</button>
         </div>
       </div>
+            {/* キャラクター切り替えボタン */}
+            <button
+        onClick={toggleCharacter}
+        className={styles.characterToggleButton}
+        style={{
+          position: 'absolute',
+          top: '10px',
+          right: '10px',
+          zIndex: 10,
+          background: 'rgba(0, 0, 0, 0.7)',
+          border: '2px solid #fff',
+          borderRadius: '50%',
+          cursor: 'pointer',
+          fontSize: '48px',
+          color: '#FFD700',
+          width: '70px',
+          height: '70px',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          boxShadow: '0 4px 10px rgba(0, 0, 0, 0.3)',
+        }}
+      >
+        <AiOutlineSwap />
+      </button>
     </div>
   );
 };
