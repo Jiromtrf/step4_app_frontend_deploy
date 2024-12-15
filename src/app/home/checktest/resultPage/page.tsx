@@ -1,5 +1,4 @@
 // frontend/src/app/home/checktest/resultPage/page.tsx
-
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
@@ -12,14 +11,12 @@ function ResultPageContent() {
     const searchParams = useSearchParams();
     const scoreParam = searchParams.get("score");
     const totalParam = searchParams.get("total");
-    const categoryParam = searchParams.get("category"); // カテゴリをクエリから取得（必要に応じて実装）
+    const categoryParam = searchParams.get("category");
     
     const score = scoreParam ? parseInt(scoreParam, 10) : 0;
     const total = totalParam ? parseInt(totalParam, 10) : 0;
     const percentage = total > 0 ? (score / total) * 100 : 0;
 
-    // **ここから追加**
-    // ページ表示時に一度だけテスト結果をPOSTで送信するuseEffect
     useEffect(() => {
         if (session && categoryParam) {
             const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -44,8 +41,7 @@ function ResultPageContent() {
             })
             .then(data => {
                 console.log('Test result saved:', data);
-                const testTime = data.created_at; // 取得した日時をtest_timeとして使用
-                // 3秒後の遷移時にtest_timeパラメータを付与
+                const testTime = data.created_at; 
                 const timer = setTimeout(() => {
                     router.push(`/home/checktest/growthAnimation?test_time=${testTime}`);
                 }, 3000);
@@ -53,8 +49,8 @@ function ResultPageContent() {
             })
             .catch(err => console.error(err));
         }
-    }, [session, categoryParam, score]);
-    // **ここまで追加**
+        // routerを依存配列に追加
+    }, [session, categoryParam, score, router]);
 
     useEffect(() => {
         let audioSrc = "";
@@ -76,6 +72,7 @@ function ResultPageContent() {
             router.push(`/home/checktest/growthAnimation?date=${testDate}`);
         }, 3000);
         return () => clearTimeout(timer);
+        // routerを依存配列に追加
     }, [router]);
 
     const getMessage = () => {

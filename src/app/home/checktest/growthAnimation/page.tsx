@@ -1,5 +1,4 @@
 // frontend/src/app/home/checktest/growthAnimation/page.tsx
-
 "use client";
 
 import { useSession } from "next-auth/react";
@@ -10,7 +9,14 @@ import HomeButton from "../../../components/HomeButton";
 
 const RadarChart = dynamic(() => import("../../../components/RadarChart"), { ssr: false });
 
-function parseAndAdjustTime(testTime: string): { preTime: string, postTime: string } {
+interface SkillsData {
+  name: string;
+  biz: number;
+  design: number;
+  tech: number;
+}
+
+function parseAndAdjustTime(testTime: string): { preTime: string; postTime: string } {
   const t = new Date(testTime);
   const preT = new Date(t.getTime() - 1000); // 1秒前
   const preDateStr = preT.toISOString().split("T")[0]; // YYYY-MM-DD形式取得
@@ -22,8 +28,8 @@ export default function GrowthAnimationPage() {
   const { data: session } = useSession();
   const searchParams = useSearchParams();
   const testTime = searchParams.get("test_time");
-  const [preSkills, setPreSkills] = useState<any>(null);
-  const [postSkills, setPostSkills] = useState<any>(null);
+  const [preSkills, setPreSkills] = useState<SkillsData | null>(null);
+  const [postSkills, setPostSkills] = useState<SkillsData | null>(null);
 
   useEffect(() => {
     if (session && testTime) {
@@ -34,17 +40,17 @@ export default function GrowthAnimationPage() {
       fetch(`${baseUrl}/api/user/skills?date=${preTime}`, {
         headers: { Authorization: `Bearer ${session.accessToken}` }
       })
-        .then(res => res.json())
-        .then(data => setPreSkills(data))
-        .catch(err => console.error(err));
+        .then((res) => res.json())
+        .then((data: SkillsData) => setPreSkills(data))
+        .catch((err) => console.error(err));
 
       // 成長後ステータス: テスト後の最新状態
       fetch(`${baseUrl}/api/user/skills`, {
         headers: { Authorization: `Bearer ${session.accessToken}` }
       })
-        .then(res => res.json())
-        .then(data => setPostSkills(data))
-        .catch(err => console.error(err));
+        .then((res) => res.json())
+        .then((data: SkillsData) => setPostSkills(data))
+        .catch((err) => console.error(err));
     }
   }, [session, testTime]);
 
