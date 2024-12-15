@@ -1,6 +1,7 @@
 // frontend/src/app/home/checktest/growthAnimation/page.tsx
 "use client";
 
+import { Suspense } from "react";
 import { useSession } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -9,6 +10,7 @@ import HomeButton from "../../../components/HomeButton";
 
 const RadarChart = dynamic(() => import("../../../components/RadarChart"), { ssr: false });
 
+// SkillsData型は以前設定した型例
 interface SkillsData {
   name: string;
   biz: number;
@@ -16,27 +18,27 @@ interface SkillsData {
   tech: number;
 }
 
-function parseAndAdjustTime(testTime: string): { preTime: string; postTime: string } {
-  const t = new Date(testTime);
-  const preT = new Date(t.getTime() - 1000); // 1秒前
-  const preDateStr = preT.toISOString().split("T")[0]; // YYYY-MM-DD形式取得
-  const postDateStr = t.toISOString().split("T")[0];   // 当日の日付取得
-  return { preTime: preDateStr, postTime: postDateStr };
-}
-
-export default function GrowthAnimationPage() {
+// ラップ用コンポーネント
+function GrowthAnimationContent() {
   const { data: session } = useSession();
   const searchParams = useSearchParams();
   const testTime = searchParams.get("test_time");
   const [preSkills, setPreSkills] = useState<SkillsData | null>(null);
   const [postSkills, setPostSkills] = useState<SkillsData | null>(null);
 
+  const parseAndAdjustTime = (testTime: string): { preTime: string; postTime: string } => {
+    const t = new Date(testTime);
+    const preT = new Date(t.getTime() - 1000); // 1秒前
+    const preDateStr = preT.toISOString().split("T")[0]; // YYYY-MM-DD形式
+    const postDateStr = t.toISOString().split("T")[0];   // 当日の日付取得
+    return { preTime: preDateStr, postTime: postDateStr };
+  };
+
   useEffect(() => {
     if (session && testTime) {
       const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
       const { preTime } = parseAndAdjustTime(testTime);
 
-      // 成長前ステータス: テスト実施直前(1秒前の日付)
       fetch(`${baseUrl}/api/user/skills?date=${preTime}`, {
         headers: { Authorization: `Bearer ${session.accessToken}` }
       })
@@ -44,7 +46,6 @@ export default function GrowthAnimationPage() {
         .then((data: SkillsData) => setPreSkills(data))
         .catch((err) => console.error(err));
 
-      // 成長後ステータス: テスト後の最新状態
       fetch(`${baseUrl}/api/user/skills`, {
         headers: { Authorization: `Bearer ${session.accessToken}` }
       })
@@ -122,5 +123,13 @@ export default function GrowthAnimationPage() {
         <HomeButton />
       </div>
     </div>
+  );
+}
+
+export default function GrowthAnimationPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <GrowthAnimationContent />
+    </Suspense>
   );
 }
