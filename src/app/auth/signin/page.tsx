@@ -27,7 +27,7 @@ export default function SignIn() {
   };
 
   const handleSignUp = () => {
-    router.push("/auth/signup"); // サインアップページへの遷移
+    router.push("/home/maintenance"); // サインアップページへの遷移
   };
 
   return (

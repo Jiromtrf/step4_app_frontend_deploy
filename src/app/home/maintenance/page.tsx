@@ -1,6 +1,9 @@
+// maintenance/page.tsx
+"use client";
+
 import React from "react";
 import Image from "next/image";
-import HomeButton from "../../components/HomeButton"; // ホームボタンのコンポーネント
+import { useRouter } from "next/navigation"; // 正しいインポート先に変更
 
 const styles: { [key: string]: React.CSSProperties } = {
   container: {
@@ -8,7 +11,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     width: "100vw",
     height: "100vh",
     display: "flex",
-    flexDirection: "column", // これで型エラーが解消されます
+    flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#f3f4f6",
@@ -26,7 +29,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   imageContainer: {
     position: "relative",
     zIndex: 2,
-    marginBottom: "20px", // 吹き出しとの間隔
+    marginBottom: "20px",
     display: "flex",
     justifyContent: "center",
   },
@@ -50,9 +53,25 @@ const styles: { [key: string]: React.CSSProperties } = {
     zIndex: 3,
     marginTop: "10px",
   },
+  backButton: { // ボタンのスタイル
+    padding: "10px 20px",
+    backgroundColor: "#4f46e5",
+    color: "#fff",
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer",
+    fontSize: "1rem",
+    transition: "background-color 0.3s ease",
+  },
 };
 
 export default function MaintenancePage() {
+  const router = useRouter(); // useRouterフックを正しいパッケージからインポート
+
+  const handleBack = () => {
+    router.back(); // 直前のページに戻る
+  };
+
   return (
     <div style={styles.container}>
       {/* 背景 */}
@@ -75,9 +94,20 @@ export default function MaintenancePage() {
         <p style={styles.text}>ごめんなさい！メンテナンス中です</p>
       </div>
 
-      {/* ホームボタン */}
+      {/* 戻るボタン */}
       <div style={styles.buttonContainer}>
-        <HomeButton />
+        <button
+          style={styles.backButton}
+          onClick={handleBack}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#4338ca";
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#4f46e5";
+          }}
+        >
+          前のページに戻る
+        </button>
       </div>
     </div>
   );
