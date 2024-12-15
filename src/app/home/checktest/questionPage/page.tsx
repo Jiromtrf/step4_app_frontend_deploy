@@ -85,7 +85,7 @@ function QuestionPageContent() {
             setSelectedOption(null);
             setShowCorrectAnswer(false);
         } else {
-            router.push(`/home/checktest/resultPage?score=${score}&total=${questions.length}`);
+            router.push(`/home/checktest/resultPage?score=${score}&total=${questions.length}&category=${category}`);
         }
     };
 

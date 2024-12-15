@@ -1,3 +1,5 @@
+// frontend/src/app/components/RadarChart.tsx
+
 import { Radar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -23,6 +25,12 @@ interface RadarChartProps {
   mode?: "individual" | "team";
   stepSize?: number;
   labels?: { goals: string; skills: string }; // 凡例を指定するプロパティ
+  datasets?: {
+    label: string;
+    data: number[];
+    backgroundColor: string;
+    borderColor: string;
+  }[];
 }
 
 export default function RadarChart({
@@ -30,7 +38,8 @@ export default function RadarChart({
   goals,
   mode = "individual",
   stepSize = 20,
-  labels = { goals: "目標値", skills: "あなたの能力値" }, // デフォルト値を設定
+  labels = { goals: "目標値", skills: "あなたの能力値" },
+  datasets,
 }: RadarChartProps) {
   const defaultSkills = { biz: 0, design: 0, tech: 0 };
   const defaultGoals = { biz: 50, design: 50, tech: 50 };
@@ -43,32 +52,35 @@ export default function RadarChart({
       ) + stepSize // 余白を持たせる
     : 100;
 
+  // datasetsが明示的に指定されていない場合は従来の表示方式を継続
+  const finalDatasets = datasets || [
+    {
+      label: labels.goals, // 目標値の凡例
+      data: [
+        goals?.biz ?? defaultGoals.biz,
+        goals?.design ?? defaultGoals.design,
+        goals?.tech ?? defaultGoals.tech,
+      ],
+      backgroundColor: "rgba(255, 99, 132, 0.2)",
+      borderColor: "rgba(255, 99, 132, 1)",
+      borderWidth: 1,
+    },
+    {
+      label: labels.skills, // 能力値の凡例
+      data: [
+        skills?.biz ?? defaultSkills.biz,
+        skills?.design ?? defaultSkills.design,
+        skills?.tech ?? defaultSkills.tech,
+      ],
+      backgroundColor: "rgba(54, 162, 235, 0.2)",
+      borderColor: "rgba(54, 162, 235, 1)",
+      borderWidth: 1,
+    },
+  ];
+
   const data = {
     labels: ["Biz", "Design", "Tech"],
-    datasets: [
-      {
-        label: labels.goals, // 目標値の凡例
-        data: [
-          goals?.biz ?? defaultGoals.biz,
-          goals?.design ?? defaultGoals.design,
-          goals?.tech ?? defaultGoals.tech,
-        ],
-        backgroundColor: "rgba(255, 99, 132, 0.2)",
-        borderColor: "rgba(255, 99, 132, 1)",
-        borderWidth: 1,
-      },
-      {
-        label: labels.skills, // 能力値の凡例
-        data: [
-          skills?.biz ?? defaultSkills.biz,
-          skills?.design ?? defaultSkills.design,
-          skills?.tech ?? defaultSkills.tech,
-        ],
-        backgroundColor: "rgba(54, 162, 235, 0.2)",
-        borderColor: "rgba(54, 162, 235, 1)",
-        borderWidth: 1,
-      },
-    ],
+    datasets: finalDatasets,
   };
 
   const options = {

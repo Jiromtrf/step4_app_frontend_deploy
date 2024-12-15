@@ -1,3 +1,4 @@
+// frontend/src/app/dashboard/page.tsx
 "use client";
 
 import { useSession } from "next-auth/react";
@@ -29,6 +30,7 @@ export default function Dashboard() {
   const [role, setRole] = useState<Roles>("PdM");
   const [userName, setUserName] = useState<string>("");
   const [message, setMessage] = useState<string>("");
+  const [selectedDate, setSelectedDate] = useState<string>(""); // 日付選択用
 
   useEffect(() => {
     if (session && session.accessToken) {
@@ -36,8 +38,9 @@ export default function Dashboard() {
 
       const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
       console.log("API Base URL:", baseUrl); // デバッグ用
+      const url = `${baseUrl}/api/user/skills${selectedDate ? `?date=${selectedDate}` : ""}`;
 
-      fetch(`${baseUrl}/api/user/skills`, {
+      fetch(url, {
         headers: {
           Authorization: `Bearer ${session.accessToken}`,
         },
@@ -57,7 +60,7 @@ export default function Dashboard() {
         })
         .catch((err) => console.error('Error fetching skills:', err.message));
     }
-  }, [session]);
+  }, [session, selectedDate]); // selectedDate変更時にも再フェッチ
 
   useEffect(() => {
     const goals = roles[role];
@@ -87,6 +90,21 @@ export default function Dashboard() {
 
   return (
     <div style={{ display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: "#f5deb3", minHeight: "100vh" }}>
+      {/* 日付選択 */}
+      <div style={{ position: "absolute", top: "60px", left: "20px" }}>
+        <input
+          type="date"
+          value={selectedDate}
+          onChange={(e) => setSelectedDate(e.target.value)}
+          style={{
+            padding: "0.5rem",
+            borderRadius: "4px",
+            background: "#f5f5f5",
+            border: "1px solid #cccccc",
+            color: "#333",
+          }}
+        />
+      </div>
       {/* ホームボタンを左上に配置 */}
       <div style={{ position: "absolute", top: "20px", left: "20px" }}>
         <HomeButton />
