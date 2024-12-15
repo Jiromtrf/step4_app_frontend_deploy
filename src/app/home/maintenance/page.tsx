@@ -1,46 +1,14 @@
-"use client";
-
+import React from "react";
 import Image from "next/image";
 import HomeButton from "../../components/HomeButton"; // ホームボタンのコンポーネント
 
-export default function MaintenancePage() {
-  return (
-    <div style={styles.container}>
-      {/* 背景 */}
-      <div style={styles.background} />
-
-      {/* 女の子の画像 */}
-      <div style={styles.imageContainer}>
-        <Image
-          src="/maintenance-girl.webp" // publicディレクトリの画像
-          alt="Maintenance Girl"
-          width={400} // 画面サイズに合わせて調整
-          height={400}
-          objectFit="contain"
-          priority
-        />
-      </div>
-
-      {/* 吹き出し */}
-      <div style={styles.speechBubble}>
-        <p style={styles.text}>ごめんなさい！メンテナンス中です</p>
-      </div>
-
-      {/* ホームボタン */}
-      <div style={styles.buttonContainer}>
-        <HomeButton />
-      </div>
-    </div>
-  );
-}
-
-const styles = {
+const styles: { [key: string]: React.CSSProperties } = {
   container: {
     position: "relative",
     width: "100vw",
     height: "100vh",
     display: "flex",
-    flexDirection: "column",
+    flexDirection: "column", // これで型エラーが解消されます
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#f3f4f6",
@@ -83,3 +51,34 @@ const styles = {
     marginTop: "10px",
   },
 };
+
+export default function MaintenancePage() {
+  return (
+    <div style={styles.container}>
+      {/* 背景 */}
+      <div style={styles.background} />
+
+      {/* 女の子の画像 */}
+      <div style={styles.imageContainer}>
+        <Image
+          src="/maintenance-girl.webp" // publicディレクトリの画像
+          alt="Maintenance Girl"
+          width={400} // 画面サイズに合わせて調整
+          height={400}
+          objectFit="contain"
+          priority
+        />
+      </div>
+
+      {/* 吹き出し */}
+      <div style={styles.speechBubble}>
+        <p style={styles.text}>ごめんなさい！メンテナンス中です</p>
+      </div>
+
+      {/* ホームボタン */}
+      <div style={styles.buttonContainer}>
+        <HomeButton />
+      </div>
+    </div>
+  );
+}
