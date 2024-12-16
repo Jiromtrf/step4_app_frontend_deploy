@@ -1,0 +1,33 @@
+/* frontend/src/app/home/study/study.module.css */
+
+.buttonContainer {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  
+  .button {
+    background-color: #0070f3; /* 青色 */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 12px 24px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .button:hover {
+    background-color: #005bb5; /* ホバー時に少し暗い青色 */
+  }
+  
+  .button:active {
+    background-color: #004494; /* クリック時にさらに暗い青色 */
+  }
+  
+  .button:disabled {
+    background-color: #a0a0a0;
+    cursor: not-allowed;
+  }
+  

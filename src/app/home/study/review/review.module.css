@@ -1,0 +1,79 @@
+/* frontend/src/app/home/study/review/review.module.css */
+
+.container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px; /* グラフと画像の間隔 */
+    padding: 40px; /* ページ全体のパディングを増やす */
+    /* background-color: #ffffff; これは削除 */
+    border-radius: 10px; /* ページの角を丸くする */
+  }
+  
+  .graphContainer {
+    flex: 2; /* グラフがより多くのスペースを占めるように調整 */
+    max-width: 800px; /* グラフの最大幅を設定 */
+    min-width: 600px; /* 最小横幅を400pxに制限 */
+    height: 400px; /* グラフの高さを設定 */
+    background-color: #ffffff; /* グラフの背景色を白に設定 */
+    padding: 20px; /* グラフ内部のパディング */
+    border-radius: 10px; /* グラフコンテナの角を丸くする */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* 軽いシャドウを追加 */
+  }
+  
+  .imageContainer {
+    position: relative;
+    width: 400px; /* 画像の幅を調整 */
+  }
+  
+  .image {
+    width: 100%;
+    height: auto; /* アスペクト比を維持 */
+    border-radius: 10px;
+  }
+  
+  .speechBubble {
+    position: absolute;
+    top: -80px; /* 吹き出しの位置を調整 */
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 600px; /* グラフの最大幅を設定 */
+    min-width: 220px; /* 最小横幅を400pxに制限 */
+    background-color: #fff;
+    border: 2px solid #333;
+    border-radius: 10px;
+    padding: 10px 15px;
+    font-size: 14px;
+    color: #333;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+  }
+  
+  .speechBubble::after {
+    content: "";
+    position: absolute;
+    bottom: -10px; /* 吹き出しの矢印の位置 */
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 10px 10px 0 10px;
+    border-style: solid;
+    border-color: #fff transparent transparent transparent;
+  }
+  
+  /* レスポンシブデザイン */
+  @media (max-width: 768px) {
+    .container {
+      flex-direction: column; /* 画面が狭い場合は縦並びに変更 */
+      align-items: center;
+    }
+  
+    .graphContainer {
+      max-width: 100%;
+      height: 400px; /* 小さい画面では高さを調整 */
+    }
+  
+    .imageContainer {
+      width: 80%; /* 画像の幅を調整 */
+      margin-top: 20px;
+    }
+  }
+  
