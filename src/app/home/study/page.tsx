@@ -2,26 +2,26 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import BackButton from "../../components/BackButton"; // BackButtonをインポート
-import styles from "./study.module.css"; // CSSモジュールをインポート
+import BackButton from "../../components/BackButton";
+import styles from "./study.module.css";
 
 export default function StudyPage() {
   const { data: session } = useSession();
   const router = useRouter();
 
   const [mode, setMode] = useState<"select" | "study" | "break">("select");
-  const [studyTime, setStudyTime] = useState<number>(0); // 1サイクルの勉強時間(秒)
-  const [remaining, setRemaining] = useState<number>(0); // 現在のサイクル残り秒数
+  const [studyTime, setStudyTime] = useState<number>(0); 
+  const [remaining, setRemaining] = useState<number>(0);
   const [isPaused, setIsPaused] = useState(false);
   const [loopActive, setLoopActive] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // totalStudiedSeconds: 全ループ合計勉強時間(秒)
+  // 全ループ合計勉強時間(秒)
   const [totalStudiedSeconds, setTotalStudiedSeconds] = useState(0);
 
-  // 勉強用のプリセット(10分,25分,60分)
+  // プリセット
   const presets = {
     "まずは始める": 10 * 60,
     "スパっと集中！": 25 * 60,
@@ -30,104 +30,12 @@ export default function StudyPage() {
 
   const breakTime = 3 * 60; // 3分休憩
 
-  // 音声ファイルの参照
-  const successAudioRef = useRef<HTMLAudioElement>(null); // タイマー終了時の音声
-  const breathAudioRef = useRef<HTMLAudioElement>(null); // 休憩終了時の音声
-  const finishAudioRef = useRef<HTMLAudioElement>(null); // 終了ボタン押下時の音声
+  // 音声ファイル参照
+  const successAudioRef = useRef<HTMLAudioElement>(null);
+  const breathAudioRef = useRef<HTMLAudioElement>(null);
+  const finishAudioRef = useRef<HTMLAudioElement>(null);
 
-  useEffect(() => {
-    if (loopActive && !isPaused && remaining > 0) {
-      timerRef.current = setTimeout(() => {
-        setRemaining((prev) => prev - 1);
-      }, 1000);
-    } else if (remaining === 0 && loopActive) {
-      handleTimerEnd();
-    }
-
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
-  }, [loopActive, isPaused, remaining]);
-
-  const handleStart = (seconds: number) => {
-    setStudyTime(seconds);
-    setRemaining(seconds);
-    setMode("study");
-    setLoopActive(true);
-    setIsPaused(false);
-    setTotalStudiedSeconds(0); // 開始時に0リセット
-  };
-
-  const handleTimerEnd = async () => {
-    // タイマー終了時(サイクル完了時)
-    if (mode === "study") {
-      // 完全に勉強サイクル完了(満了)の場合、studyTime分を加算
-      setTotalStudiedSeconds((prev) => prev + studyTime);
-      // success.mp3を再生
-      if (successAudioRef.current) {
-        successAudioRef.current.play().catch((error) => {
-          console.error("success.mp3の再生に失敗しました:", error);
-        });
-      }
-      alert("休憩しよう！");
-      setMode("break");
-      setRemaining(breakTime);
-    } else if (mode === "break") {
-      // 休憩終わり→再度勉強へ
-      setMode("study");
-      setRemaining(studyTime);
-
-      // 休憩終了時に "もう一息です.mp3" を再生
-      if (breathAudioRef.current) {
-        breathAudioRef.current.play().catch((error) => {
-          console.error("もう一息です.mp3の再生に失敗しました:", error);
-        });
-      }
-    }
-  };
-
-  const handlePause = () => {
-    setIsPaused(!isPaused);
-  };
-
-  const handleEnd = async () => {
-    // 終了ボタン押下時：ループ停止
-    setLoopActive(false);
-    // 現在のサイクルがstudy中で途中終了の場合、経過した分を加算
-    if (mode === "study" && remaining > 0 && remaining < studyTime) {
-      const studiedThisCycle = studyTime - remaining; // 経過秒数
-      setTotalStudiedSeconds((prev) => prev + studiedThisCycle);
-    }
-    // modeがbreak中は休憩なので勉強時間加算なし
-
-    // 最終的な合計勉強時間（分）をPOST
-    if (
-      totalStudiedSeconds > 0 ||
-      (mode === "study" && studyTime - remaining > 0)
-    ) {
-      const finalMinutes = Math.floor(
-        (totalStudiedSeconds +
-          (mode === "study" ? studyTime - remaining : 0)) /
-          60
-      );
-      await sendStudyLog(finalMinutes);
-    }
-
-    // 終了時に "頑張ったね.mp3" を再生
-    if (finishAudioRef.current) {
-      finishAudioRef.current.play().catch((error) => {
-        console.error("頑張ったね.mp3の再生に失敗しました:", error);
-      });
-    }
-
-    setMode("select");
-    setStudyTime(0);
-    setRemaining(0);
-    setIsPaused(false);
-    setTotalStudiedSeconds(0);
-  };
-
-  const sendStudyLog = async (minutes: number) => {
+  const sendStudyLog = useCallback(async (minutes: number) => {
     if (!session?.accessToken) return;
     try {
       const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -142,10 +50,95 @@ export default function StudyPage() {
       if (!res.ok) {
         console.error("Failed to send study log:", await res.text());
       }
-    } catch (e) {
-      console.error("Failed to send study log:", e);
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        console.error("Failed to send study log:", e.message);
+      } else {
+        console.error("Failed to send study log:", e);
+      }
     }
+  }, [session?.accessToken]);
+
+  const handleTimerEnd = useCallback(async () => {
+    if (mode === "study") {
+      setTotalStudiedSeconds((prev) => prev + studyTime);
+      if (successAudioRef.current) {
+        successAudioRef.current.play().catch((error) => {
+          console.error("success.mp3の再生に失敗しました:", error);
+        });
+      }
+      alert("休憩しよう！");
+      setMode("break");
+      setRemaining(breakTime);
+    } else if (mode === "break") {
+      setMode("study");
+      setRemaining(studyTime);
+      if (breathAudioRef.current) {
+        breathAudioRef.current.play().catch((error) => {
+          console.error("もう一息です.mp3の再生に失敗しました:", error);
+        });
+      }
+    }
+  }, [mode, studyTime, breakTime]);
+
+  useEffect(() => {
+    if (loopActive && !isPaused && remaining > 0) {
+      timerRef.current = setTimeout(() => {
+        setRemaining((prev) => prev - 1);
+      }, 1000);
+    } else if (remaining === 0 && loopActive) {
+      void handleTimerEnd();
+    }
+
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [loopActive, isPaused, remaining, handleTimerEnd]);
+
+  const handleStart = (seconds: number) => {
+    setStudyTime(seconds);
+    setRemaining(seconds);
+    setMode("study");
+    setLoopActive(true);
+    setIsPaused(false);
+    setTotalStudiedSeconds(0);
   };
+
+  const handlePause = () => {
+    setIsPaused(!isPaused);
+  };
+
+  const handleEnd = useCallback(async () => {
+    setLoopActive(false);
+    if (mode === "study" && remaining > 0 && remaining < studyTime) {
+      const studiedThisCycle = studyTime - remaining;
+      setTotalStudiedSeconds((prev) => prev + studiedThisCycle);
+    }
+
+    if (
+      totalStudiedSeconds > 0 ||
+      (mode === "study" && studyTime - remaining > 0)
+    ) {
+      const finalMinutes = Math.floor(
+        (totalStudiedSeconds +
+          (mode === "study" ? studyTime - remaining : 0)) /
+          60
+      );
+      await sendStudyLog(finalMinutes);
+    }
+
+    if (finishAudioRef.current) {
+      finishAudioRef.current.play().catch((error) => {
+        console.error("頑張ったね.mp3の再生に失敗しました:", error);
+      });
+    }
+
+    setMode("select");
+    setStudyTime(0);
+    setRemaining(0);
+    setIsPaused(false);
+    setTotalStudiedSeconds(0);
+  }, [mode, remaining, studyTime, totalStudiedSeconds, sendStudyLog]);
 
   const formatTime = (sec: number) => {
     const m = Math.floor(sec / 60);
@@ -156,23 +149,21 @@ export default function StudyPage() {
   return (
     <div
       style={{
-        minHeight: "100vh",
-        backgroundColor: "#f5deb3",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        color: "#333",
-        fontFamily: "Arial, sans-serif",
-        padding: "20px",
-        textAlign: "center",
-        position: "relative",
+        minHeight:"100vh",
+        backgroundColor:"#f5deb3",
+        display:"flex",
+        flexDirection:"column",
+        alignItems:"center",
+        justifyContent:"center",
+        color:"#333",
+        fontFamily:"Arial, sans-serif",
+        padding:"20px",
+        textAlign:"center",
+        position:"relative"
       }}
     >
-      {/* 戻るボタン */}
       <BackButton />
 
-      {/* 振り返るページへのリンク */}
       <button
         className={styles.button}
         style={{
@@ -230,16 +221,15 @@ export default function StudyPage() {
         </div>
       )}
 
-      {/* 100時間チャレンジエリア */}
       <div
         style={{
-          position: "absolute",
-          bottom: "20px",
-          backgroundColor: "#fff",
-          border: "1px solid #ccc",
-          borderRadius: "5px",
-          padding: "10px",
-          boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
+          position:"absolute",
+          bottom:"20px",
+          backgroundColor:"#fff",
+          border:"1px solid #ccc",
+          borderRadius:"5px",
+          padding:"10px",
+          boxShadow:"0 2px 5px rgba(0,0,0,0.1)"
         }}
       >
         <ChallengeDisplay />
@@ -285,7 +275,7 @@ function ChallengeDisplay() {
 
       const data = await res.json();
       const total = data.total_minutes || 0;
-      const target = 100 * 60; // 100時間=6000分
+      const target = 100 * 60; 
       const diff = target - total;
       if (diff <= 0) {
         setRemaining("100時間達成おめでとう！");
@@ -295,7 +285,7 @@ function ChallengeDisplay() {
         setRemaining(`残り ${h}h${m}min`);
       }
     };
-    fetchLogs();
+    void fetchLogs();
   }, [session]);
 
   return <div>100時間チャレンジ: {remaining}</div>;

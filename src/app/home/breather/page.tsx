@@ -1,7 +1,7 @@
-// src/app/home/breather/page.tsx
+// frontend/src/app/home/breather/page.tsx
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 
 type Cell = "empty" | "black" | "white";
 type Board = Cell[][];
@@ -14,7 +14,7 @@ const initialBoard: Board = Array(8)
       .map(() => "empty")
   );
 
-// 初期配置をセット
+// 初期配置
 initialBoard[3][3] = "white";
 initialBoard[3][4] = "black";
 initialBoard[4][3] = "black";
@@ -25,25 +25,12 @@ export default function Page() {
   const [gameOver, setGameOver] = useState(false);
   const [winner, setWinner] = useState<string | null>(null);
 
-  // 方向ベクトル（8方向）
   const directions = [
-    [-1, 0], // 上
-    [1, 0], // 下
-    [0, -1], // 左
-    [0, 1], // 右
-    [-1, -1], // 左上
-    [-1, 1], // 右上
-    [1, -1], // 左下
-    [1, 1], // 右下
+    [-1, 0], [1, 0], [0, -1], [0, 1],
+    [-1, -1], [-1, 1], [1, -1], [1, 1]
   ];
 
-  // 駒をひっくり返す関数
-  const flipPieces = (
-    row: number,
-    col: number,
-    newBoard: Board,
-    player: "black" | "white"
-  ): boolean => {
+  const flipPieces = useCallback((row: number, col: number, newBoard: Board, player: "black" | "white") => {
     let flipped = false;
 
     directions.forEach(([dx, dy]) => {
@@ -52,12 +39,8 @@ export default function Page() {
       let y = col + dy;
 
       while (
-        x >= 0 &&
-        x < 8 &&
-        y >= 0 &&
-        y < 8 &&
-        newBoard[x][y] !== "empty" &&
-        newBoard[x][y] !== player
+        x >= 0 && x < 8 && y >= 0 && y < 8 &&
+        newBoard[x][y] !== "empty" && newBoard[x][y] !== player
       ) {
         toFlip.push([x, y]);
         x += dx;
@@ -65,10 +48,8 @@ export default function Page() {
       }
 
       if (
-        x >= 0 &&
-        x < 8 &&
-        y >= 0 &&
-        y < 8 &&
+        x >= 0 && x < 8 &&
+        y >= 0 && y < 8 &&
         newBoard[x][y] === player
       ) {
         flipped = true;
@@ -79,25 +60,18 @@ export default function Page() {
     });
 
     return flipped;
-  };
+  }, [directions]);
 
-  // プレイヤーが置けるか確認
-  const canPlacePiece = (
-    row: number,
-    col: number,
-    player: "black" | "white"
-  ): boolean => {
+  const canPlacePiece = useCallback((row: number, col: number, player: "black" | "white") => {
     if (board[row][col] !== "empty") return false;
-
-    const newBoard = board.map((row) => row.slice());
+    const newBoard = board.map((r) => r.slice());
     return flipPieces(row, col, newBoard, player);
-  };
+  }, [board, flipPieces]);
 
-  // 白（AI）のターン
-  const whiteAI = () => {
+  const whiteAI = useCallback(() => {
     if (gameOver) return;
 
-    const newBoard = board.map((row) => row.slice());
+    const newBoard = board.map((r) => r.slice());
 
     for (let row = 0; row < 8; row++) {
       for (let col = 0; col < 8; col++) {
@@ -109,13 +83,12 @@ export default function Page() {
         }
       }
     }
-  };
+  }, [board, canPlacePiece, flipPieces, gameOver]);
 
-  // クリック時の処理（黒プレイヤー）
   const handleCellClick = (row: number, col: number) => {
     if (board[row][col] !== "empty" || gameOver) return;
 
-    const newBoard = board.map((row) => row.slice());
+    const newBoard = board.map((r) => r.slice());
 
     if (flipPieces(row, col, newBoard, "black")) {
       newBoard[row][col] = "black";
@@ -123,8 +96,7 @@ export default function Page() {
     }
   };
 
-  // 勝敗判定
-  const checkWinner = () => {
+  const checkWinner = useCallback(() => {
     const blackCount = board.flat().filter((cell) => cell === "black").length;
     const whiteCount = board.flat().filter((cell) => cell === "white").length;
 
@@ -132,21 +104,19 @@ export default function Page() {
       setGameOver(true);
       setWinner(blackCount > whiteCount ? "Black Wins!" : "White Wins!");
     }
-  };
+  }, [board]);
 
-  // 白（AI）のターンを0.7秒ごとに実行
   useEffect(() => {
     const interval = setInterval(() => {
       whiteAI();
     }, 700);
 
     return () => clearInterval(interval);
-  }, [board]);
+  }, [whiteAI]);
 
-  // 勝敗判定のトリガー
   useEffect(() => {
     checkWinner();
-  }, [board]);
+  }, [checkWinner]);
 
   return (
     <div
@@ -246,6 +216,4 @@ export default function Page() {
       )}
     </div>
   );
-
 }
-

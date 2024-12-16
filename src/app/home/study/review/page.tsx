@@ -1,20 +1,21 @@
 // frontend/src/app/home/study/review/page.tsx
 "use client";
 
-// インポート文は `"use client";` の後に配置します
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { Bar } from "react-chartjs-2"; 
+import { Bar } from "react-chartjs-2";
 import 'chart.js/auto';
-import BackButton from "../../../components/BackButton"; // BackButtonをインポート
-import styles from "./review.module.css"; // CSSモジュールをインポート
+import BackButton from "../../../components/BackButton";
+import styles from "./review.module.css";
+import Image from "next/image";
 
 export default function ReviewPage() {
   const { data: session } = useSession();
   const [logs, setLogs] = useState<{ [date: string]: number }>({});
   const [total, setTotal] = useState(0);
-  const [average, setAverage] = useState(0); // 平均勉強時間
-  const [message, setMessage] = useState(""); // フキダシのメッセージ
+  // averageは使っていないため削除
+  // const [average, setAverage] = useState(0);
+  const [message, setMessage] = useState(""); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,10 +26,7 @@ export default function ReviewPage() {
         return;
       }
 
-      // JST基準で今日の日付を取得する処理例（クライアントが日本時間を想定）
       const now = new Date();
-
-      // 直近7日間の開始日を、today含めて6日前まで遡る
       const daysFromMonday = now.getDay() === 0 ? 6 : now.getDay() - 1;
       const start = new Date(
         now.getFullYear(),
@@ -51,9 +49,7 @@ export default function ReviewPage() {
       if (data && data.logs) {
         setLogs(data.logs);
         setTotal(data.total_minutes || 0);
-        const calculatedAverage = (data.total_minutes || 0) / 7; // 平均勉強時間を計算
-        setAverage(calculatedAverage);
-        // メッセージを設定
+        const calculatedAverage = (data.total_minutes || 0) / 7;
         if (calculatedAverage <= 100) {
           setMessage("勉強時間足りてなくない？もっとがんばろ！");
         } else {
@@ -62,22 +58,20 @@ export default function ReviewPage() {
       } else {
         setLogs({});
         setTotal(0);
-        setAverage(0);
         setMessage("勉強ログがありません");
       }
     };
-    try {
-      fetchLogs().catch(e => {
-        console.error(e);
+    void fetchLogs().catch((e: unknown) => {
+      if (e instanceof Error) {
+        console.error(e.message);
         setError(e.message);
-      }).finally(() => {
-        setLoading(false);
-      });
-    } catch (e: any) {
-      console.error(e);
-      setError(e.message);
+      } else {
+        console.error(e);
+        setError("不明なエラーが発生しました");
+      }
+    }).finally(() => {
       setLoading(false);
-    }
+    });
   }, [session]);
 
   if (loading) {
@@ -130,7 +124,7 @@ export default function ReviewPage() {
 
   const chartOptions = {
     responsive: true,
-    maintainAspectRatio: false, // これをfalseに設定
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         position: "top" as const,
@@ -157,12 +151,10 @@ export default function ReviewPage() {
         position: "relative"
       }}
     >
-      {/* 戻るボタン */}
       <BackButton />
 
       <h1>1週間の振り返り</h1>
       <div className={styles.container}>
-        {/* グラフコンテナ */}
         <div className={styles.graphContainer}>
           {dates.length === 0 ? (
             <p>勉強ログがありません</p>
@@ -172,14 +164,12 @@ export default function ReviewPage() {
           <p style={{ marginTop: "20px" }}>合計勉強時間: {Math.floor(total/60)}h{total%60}min</p>
         </div>
 
-        {/* 画像コンテナ */}
         <div className={styles.imageContainer}>
-          {/* 吹き出し */}
           <div className={styles.speechBubble}>
             {dates.length === 0 ? "" : message}
           </div>
-          {/* 画像 */}
-          <img src="/girl1.webp" alt="Girl" className={styles.image} />
+          {/* imgをImageに変更 */}
+          <Image src="/girl1.webp" alt="Girl" className={styles.image} width={200} height={200} />
         </div>
       </div>
     </div>
