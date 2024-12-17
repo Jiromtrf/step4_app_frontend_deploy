@@ -1,9 +1,7 @@
-/* frontend/src/app/home/teaming/teaming.module.css */
-
 .container {
   display: flex;
   height: 100vh;
-  color: #333; /* テキスト色を濃くする */
+  color: #333;
   font-family: "Arial", sans-serif;
   background-color: #f5deb3;
 }
@@ -48,7 +46,7 @@
 }
 
 .roleCard {
-  width: 150px;
+  width: 250px;
   background: white;
   border-radius: 10px;
   text-align: center;
@@ -77,75 +75,97 @@
   margin: 5px 0;
 }
 
-.chartContainer {
-  margin-top: 20px;
-  width: 100%;
-  max-width: 600px; /* 最大幅を設定 */
-  height: auto; /* 高さを自動調整 */
-  display: flex;
-  justify-content: center;
-
-  /* 追加・変更するスタイル */
-  background-color: white; /* 背景色を白に */
-  padding: 20px; /* 内側の余白を追加 */
-  border-radius: 10px; /* 角を丸める */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* ボックスシャドウを追加 */
-}  
-
-.popup {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.popupContent {
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  text-align: center;
-}
-
 .member {
   display: flex;
-  flex-direction: column; /* 縦並びに変更 */
-  align-items: center;    /* 中央揃え */
+  flex-direction: column;
+  align-items: center;
   padding: 10px;
-  background-color: #f9f9f9; /* 背景色（オプション） */
-  border-radius: 8px;        /* 角を丸める（オプション） */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* ボックスシャドウ（オプション） */
-  margin-bottom: 10px;       /* メンバー間の余白（オプション） */
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  margin-bottom: 10px;
 }
 
 .avatar {
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  margin-bottom: 10px; /* アイコンと名前の間の余白 */
+  margin-bottom: 10px;
 }
 
-.member p {
-  margin: 5px 0;
+.member p:first-of-type {
+  font-weight: bold; /* 名前だけ太字 */
+  font-size: 1.1rem !important; /* 必要なら!importantで確実に反映 */
 }
+
+.member p:not(:first-of-type) {
+  font-size: 0.8rem; /* 得意分野・志向性・コアタイムは小さく */
+}
+
 
 .member button {
-  margin-top: 5px; /* 名前とボタンの間の余白 */
+  margin-top: 5px;
   padding: 5px 10px;
   background-color: #6789ee;
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.3s ease; /* ホバー時のスムーズな色変化 */
+  transition: background-color 0.3s ease;
 }
 
 .member button:hover {
-  background-color: #7895ed; /* ホバー時の背景色 */
+  background-color: #7895ed;
+}
+
+/* girlAndChartコンテナを追加 */
+.girlAndChart {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 40px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.chartContainer {
+  flex: 0 1 350px;
+  width: 100%;
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.speechBubble {
+  background-color: #fff;
+  border-radius: 15px;
+  padding: 20px;
+  font-size: 1.0rem;
+  text-align: center;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  max-width: 300px;
+  line-height: 1.6;
+  box-sizing: border-box;
+}
+
+.girlContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.girlImage {
+  width: 200px;
+  height: auto;
+  border-radius: 50%;
+  border: 4px solid #fff;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
 .overlay {
@@ -164,7 +184,7 @@
   max-width: 600px;
   width: 80%;
   margin: 0 auto;
-  position: absolute; /* overlay内で中央に配置 */
+  position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -177,8 +197,6 @@
   flex-direction: column;
   gap: 10px;
 }
-
-/* 新たに追加されたクラス */
 
 .filterGroup {
   display: flex;
@@ -317,4 +335,15 @@
 
 .createButton:hover {
   background-color: #45a049;
+}
+
+.bubbleAndGirl {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* 必要に応じて中央揃え */
+  gap: 20px; /* 吹き出しと女の子の画像の間隔を調整 */
+}
+
+.sidebar h2 {
+  margin-top: 20px; /* 好みの値に調整 */
 }

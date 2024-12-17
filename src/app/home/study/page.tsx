@@ -236,7 +236,7 @@ export default function StudyPage() {
       </div>
 
       {/* 音声ファイル */}
-      <audio ref={successAudioRef} src="/success.mp3" preload="auto"></audio>
+      <audio ref={successAudioRef} src="/お疲れ様です.mp3" preload="auto"></audio>
       <audio ref={breathAudioRef} src="/もう一息です.mp3" preload="auto"></audio>
       <audio ref={finishAudioRef} src="/頑張ったね.mp3" preload="auto"></audio>
     </div>

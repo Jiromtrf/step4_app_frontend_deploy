@@ -1,5 +1,3 @@
-// frontend/src/app/home/teaming/page.tsx
-
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
@@ -9,6 +7,8 @@ import { useSession } from "next-auth/react";
 import styles from "./teaming.module.css";
 import Modal from "react-modal";
 import Image from "next/image";
+import HomeButton from "../../components/HomeButton";
+import Link from 'next/link';
 
 const RadarChart = dynamic(() => import("../../components/RadarChart"), { ssr: false });
 
@@ -47,8 +47,25 @@ const phaseGoals = {
   step4: { biz: 250, design: 200, tech: 180 },
 };
 
+const praiseMessages = [
+  "スゴッ！『{param}』は完璧じゃん！その調子で突き抜けちゃおう！✨",
+  "さっすが～！『{param}』がバッチリ仕上がってて最高だよ！次のステージも余裕でしょ～！🔥",
+  "『{param}』完璧すぎて、もはやレジェンド級じゃん！みんなも惚れちゃうよ～！💖",
+];
+const improvementMessages = [
+  "『{param}』はあと少しだね！✨",
+  "『{param}』をもうちょっとだけ増やせたら完璧だよ！💪",
+  "『{param}』の強い人を入れるのもいいかもね！😊",
+];
+const teamComments = [
+  "チームのバランスいい感じじゃん！このまま突っ走っちゃおう！✨",
+  "みんなそれぞれの強みを発揮してて最高だね！🔥",
+  "お互い助け合ってるのが伝わってきて、めっちゃエモいチーム！がんばろ～！💖",
+];
+
 export default function Teaming() {
   const { data: session } = useSession();
+  const [message, setMessage] = useState<string>(""); // 女の子のメッセージ
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [roles, setRoles] = useState<Roles>({
     PdM: null,
@@ -67,8 +84,8 @@ export default function Teaming() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchFilters, setSearchFilters] = useState({
     name: "",
-    specialties: [] as string[],      // 配列に戻す
-    orientations: [] as string[],     // 配列に戻す
+    specialties: [] as string[],
+    orientations: [] as string[],
   });
   const [searchResults, setSearchResults] = useState<User[]>([]);
   const [recommendedUsers, setRecommendedUsers] = useState<number[]>([]);
@@ -88,6 +105,54 @@ export default function Teaming() {
       Modal.setAppElement('body');
     }
   }, []);
+
+  // チームメッセージの更新
+  useEffect(() => {
+    const achievedParams: string[] = [];
+    const lackingParams: string[] = [];
+
+    if (chartData.biz >= teamGoals.biz) {
+      achievedParams.push("Biz");
+    } else {
+      lackingParams.push("Biz");
+    }
+
+    if (chartData.design >= teamGoals.design) {
+      achievedParams.push("Design");
+    } else {
+      lackingParams.push("Design");
+    }
+
+    if (chartData.tech >= teamGoals.tech) {
+      achievedParams.push("Tech");
+    } else {
+      lackingParams.push("Tech");
+    }
+
+    let chosenMessage = "";
+
+    if (achievedParams.length > 0) {
+      chosenMessage += achievedParams
+        .map((param) =>
+          praiseMessages[Math.floor(Math.random() * praiseMessages.length)].replace("{param}", param)
+        )
+        .join("\n");
+    }
+
+    if (lackingParams.length > 0) {
+      chosenMessage += "\n\n";
+      chosenMessage += lackingParams
+        .map((param) =>
+          improvementMessages[Math.floor(Math.random() * improvementMessages.length)].replace("{param}", param)
+        )
+        .join("\n");
+    }
+
+    chosenMessage += "\n\n";
+    chosenMessage += teamComments[Math.floor(Math.random() * teamComments.length)];
+
+    setMessage(chosenMessage);
+  }, [chartData, teamGoals]);
 
   // 現在の学習フェーズが変更されたときに目標値を更新
   useEffect(() => {
@@ -145,7 +210,7 @@ export default function Teaming() {
         if (currentValue === null) {
           newRoles[r] = member;
         } else if (Array.isArray(currentValue)) {
-          (newRoles[r] as User[]).push(member); // 型アサーションを追加
+          (newRoles[r] as User[]).push(member);
         } else {
           newRoles[r] = [currentValue, member];
         }
@@ -201,14 +266,13 @@ export default function Teaming() {
 
   const handleSearch = useCallback(async () => {
     try {
-      // フィルターが空の場合、全ユーザーを取得するために必要な処理を行う
       const filters = {
         name: searchFilters.name.trim() === "" ? undefined : searchFilters.name,
         specialties: searchFilters.specialties.length > 0 ? searchFilters.specialties : undefined,
         orientations: searchFilters.orientations.length > 0 ? searchFilters.orientations : undefined,
       };
 
-      const response = await axios.post<{data: User[]}>(`${baseUrl}/api/user/search`, filters, {
+      const response = await axios.post<{ data: User[] }>(`${baseUrl}/api/user/search`, filters, {
         headers: {
           Authorization: `Bearer ${session?.accessToken}`,
         },
@@ -245,13 +309,8 @@ export default function Teaming() {
     if (confirm("このメンバーを外しますか？")) {
       try {
         await axios.delete(`${baseUrl}/api/team/remove_member`, {
-          data: {
-            team_id: currentTeamId,
-            role: role
-          },
-          headers: {
-            Authorization: `Bearer ${session?.accessToken}`,
-          },
+          data: { team_id: currentTeamId, role: role },
+          headers: { Authorization: `Bearer ${session?.accessToken}` },
         });
         alert("メンバーを削除しました！レーダーチャートを更新します。");
         fetchTeamInfo();
@@ -301,7 +360,7 @@ export default function Teaming() {
 
   const handleCreateTeam = useCallback(async () => {
     try {
-      const response = await axios.post<{team_id: number}>(`${baseUrl}/api/team/create`, {
+      const response = await axios.post<{ team_id: number }>(`${baseUrl}/api/team/create`, {
         name: newTeamName
       }, {
         headers: {
@@ -322,7 +381,6 @@ export default function Teaming() {
     }
   }, [baseUrl, fetchTeamInfo, newTeamName, session?.accessToken]);
 
-  // リセットボタンのハンドラー
   const handleResetFilters = useCallback(() => {
     setSearchFilters({
       name: "",
@@ -334,13 +392,12 @@ export default function Teaming() {
   return (
     <div className={styles.container}>
       <aside className={styles.sidebar}>
+      <HomeButton /> {/* サイドバー内にホームボタン追加 */}
+      
         <h2>チーム</h2>
         <ul>
           <li className={styles.active}>チーム構成</li>
-          <li>メンバー募集</li>
-          <li>メンバー検索</li>
-          <li>プロフィール</li>
-          <li>メッセージ</li>
+          <li><Link href="/home/maintenance">メンバー募集</Link></li>
         </ul>
       </aside>
 
@@ -362,69 +419,122 @@ export default function Teaming() {
         </div>
 
         {currentTeamId ? (
-          <>
-            <div className={styles.roles}>
-              {(["PdM", "Biz", "Tech", "Design"] as (keyof Roles)[]).map((role) => {
-                const roleData = roles[role];
-                return (
-                  <div key={role} className={styles.roleCard}>
-                    <div className={styles.roleHeader} style={{ backgroundColor: getRoleColor(role) }}>
-                      {role}
-                      <button onClick={() => handleAddMemberClick(role)} className={styles.addButton}>
-                        +
-                      </button>
-                    </div>
-                    {roleData && (
-                      <div className={styles.roleDetails}>
-                        {Array.isArray(roleData) ? (
-                          roleData.map((member) => (
-                            <div key={member.user_id} className={styles.member}>
-                              <Image
-                                src={member.avatar_url || "/default-avatar.png"}
-                                alt={member.name}
-                                className={styles.avatar}
-                                width={50}
-                                height={50}
-                              />
-                              <p>{member.name}</p>
-                              <button onClick={() => handleRemoveMember(role)}>メンバーを外す</button>
-                            </div>
-                          ))
-                        ) : (
-                          <div className={styles.member}>
-                            <Image
-                              src={roleData.avatar_url || "/default-avatar.png"}
-                              alt={roleData.name}
-                              className={styles.avatar}
-                              width={50}
-                              height={50}
-                            />
-                            <p>{roleData.name}</p>
-                            <button onClick={() => handleRemoveMember(role)}>メンバーを外す</button>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+  <>
+    <div className={styles.roles}>
+      {(["PdM", "Biz", "Tech", "Design"] as (keyof Roles)[]).map((role) => {
+        const roleData = roles[role];
+        return (
+          <div key={role} className={styles.roleCard}>
+            <div className={styles.roleHeader} style={{ backgroundColor: getRoleColor(role) }}>
+              {role}
+              <button onClick={() => handleAddMemberClick(role)} className={styles.addButton}>
+                +
+              </button>
             </div>
+            {roleData && (
+              <div className={styles.roleDetails}>
+                {Array.isArray(roleData) ? (
+                  roleData.map((member) => (
+                    <div key={member.user_id} className={styles.member}>
+                      <Image
+                        src={member.avatar_url || "/default-avatar.png"}
+                        alt={member.name}
+                        className={styles.avatar}
+                        width={50}
+                        height={50}
+                      />
+                      <p>{member.name}</p>
+                      <p>
+                        得意分野:{" "}
+                        {member.specialties && member.specialties.length > 0
+                          ? member.specialties.join(", ")
+                          : "登録なし"}
+                      </p>
+                      <p>
+                        志向性:{" "}
+                        {member.orientations && member.orientations.length > 0
+                          ? member.orientations.join(", ")
+                          : "登録なし"}
+                      </p>
+                      <p>
+                        コアタイム:{" "}
+                        {member.core_time && member.core_time.trim() !== ""
+                          ? member.core_time
+                          : "登録なし"}
+                      </p>
+                      <button onClick={() => handleRemoveMember(role)}>外す</button>
+                    </div>
+                  ))
+                ) : (
+                  <div className={styles.member}>
+                    <Image
+                      src={roleData.avatar_url || "/default-avatar.png"}
+                      alt={roleData.name}
+                      className={styles.avatar}
+                      width={50}
+                      height={50}
+                    />
+                    <p>{roleData.name}</p>
+                    <p>
+                      得意分野:{" "}
+                      {roleData.specialties && roleData.specialties.length > 0
+                        ? roleData.specialties.join(", ")
+                        : "登録なし"}
+                    </p>
+                    <p>
+                      志向性:{" "}
+                      {roleData.orientations && roleData.orientations.length > 0
+                        ? roleData.orientations.join(", ")
+                        : "登録なし"}
+                    </p>
+                    <p>
+                      コアタイム:{" "}
+                      {roleData.core_time && roleData.core_time.trim() !== ""
+                        ? roleData.core_time
+                        : "登録なし"}
+                    </p>
+                    <button onClick={() => handleRemoveMember(role)}>外す</button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
 
-            <div className={styles.chartContainer}>
-              <RadarChart
-                skills={chartData}
-                goals={teamGoals}
-                mode="team"
-                stepSize={50} // チーム用にstepSizeを50に設定
-                labels={{ goals: "目標値", skills: "チームの能力値" }} // 凡例を変更
-              />
+            {/* girlAndChartコンテナを追加 */}
+            <div className={styles.girlAndChart}>
+              <div className={styles.chartContainer}>
+                <RadarChart
+                  skills={chartData}
+                  goals={teamGoals}
+                  mode="team"
+                  stepSize={50}
+                  labels={{ goals: "目標値", skills: "チームの能力値" }}
+                />
+              </div>
+              <div className={styles.bubbleAndGirl}>
+                <div className={styles.speechBubble}>{message}</div>
+                <div className={styles.girlContainer}>
+                  <Image
+                    src="/girl1.webp"
+                    alt="Girl Image"
+                    width={200}
+                    height={200}
+                    className={styles.girlImage}
+                  />
+                </div>
+                </div>
             </div>
           </>
         ) : (
           <div>
             <p>現在、あなたはどのチームにも所属していません。</p>
             <p>新たにチームを作成しますか？</p>
-            <button onClick={() => setIsCreateTeamModalOpen(true)}>チームを作成</button>
+            <button onClick={() => setIsCreateTeamModalOpen(true)}
+              className={styles.createButton} 
+              >チームを作成</button>
           </div>
         )}
       </main>
@@ -465,7 +575,7 @@ export default function Teaming() {
                 });
               }}
             >
-              <option value="">すべて</option> {/* リセット用 */}
+              <option value="">すべて</option>
               <option value="Tech">Tech</option>
               <option value="Design">Design</option>
               <option value="Biz">Biz</option>
@@ -492,7 +602,7 @@ export default function Teaming() {
                 });
               }}
             >
-              <option value="">すべて</option> {/* リセット用 */}
+              <option value="">すべて</option>
               <option value="Tech">Tech</option>
               <option value="Design">Design</option>
               <option value="Biz">Biz</option>
