@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useState, useCallback, useEffect, useMemo } from "react";
+import HomeButton from "../../components/HomeButton"; // HomeButton をインポート
 
 type Cell = "empty" | "black" | "white";
 type Board = Cell[][];
@@ -127,8 +128,14 @@ export default function Page() {
         alignItems: "center",
         backgroundColor: "#f5deb3",
         minHeight: "100vh",
+        position: "relative", // 子要素の絶対位置を有効にするために相対位置を設定
       }}
     >
+      {/* ホームボタンを左上に固定 */}
+      <div style={{ position: "absolute", top: "20px", left: "20px" }}>
+        <HomeButton />
+      </div>
+
       <h1>Fast Othello</h1>
       <div
         style={{
