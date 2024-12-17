@@ -1,0 +1,135 @@
+/* frontend/src/app/dashboard/dashboard.module.css */
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    gap: 2rem;
+    width: 90%;
+    max-width: 1200px;
+  }
+  
+  .datePicker {
+    width: 100%;
+    text-align: right;
+  }
+  
+  .innerFlexContainer {
+    display: flex;
+    gap: 2rem;
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .speechBubbleContainer {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1 1 300px;
+    max-width: 400px;
+  }
+  
+  .speechBubble {
+    position: relative;
+    margin-bottom: 1rem;
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 1rem;
+    font-size: 1.2rem;
+    color: #333;
+    text-align: center;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    max-width: 300px;
+  }
+  
+  .speechBubble::after {
+    content: "";
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 10px solid #fff;
+  }
+  
+  .image {
+    border-radius: 50%;
+    border: 4px solid white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .roleContainer {
+    display: flex;
+    flex-direction: column; /* 縦方向に配置 */
+    align-items: center;
+    flex: 1 1 400px;
+    max-width: 600px;
+    width: 100%;
+  }
+  
+  .selectRole {
+    /* 既存のスタイルを保持しつつ、背景色と枠線を透明に */
+    padding: 0.5rem;
+    border-radius: 4px;
+    background: transparent; /* 背景色を透明に */
+    border: none; /* 枠線を無効に */
+    width: 100%;
+    max-width: 300px;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  /* 新しく追加した .customSelect クラスのスタイル */
+  .customSelect {
+    background: #fff; /* 背景色を白に */
+    border: 1px solid #ccc; /* 枠線の色をグレーに */
+    color: #333; /* テキスト色をダークグレーに */
+    padding: 0.5rem;
+    border-radius: 4px;
+    width: 100%;
+    max-width: 100px;
+    cursor: pointer;
+    appearance: none; /* デフォルトの矢印を非表示に */
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12'%3E%3Cpath d='M6 7l5-5H1z' fill='%23333'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 12px;
+  }
+  
+  .customSelect:hover {
+    border-color: #999; /* ホバー時に枠線の色を濃く */
+  }
+  
+  .customSelect:focus {
+    outline: none; /* デフォルトのアウトラインを削除 */
+    border-color: #666; /* フォーカス時に枠線の色を濃く */
+    box-shadow: 0 0 5px rgba(102, 102, 102, 0.5); /* フォーカス時にシャドウを追加 */
+  }
+  
+  @media (max-width: 768px) {
+    .innerFlexContainer {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .speechBubbleContainer,
+    .roleContainer {
+      max-width: 100%;
+      flex: none;
+    }
+  
+    .speechBubble {
+      width: 80%;
+      top: -60px;
+    }
+  }
+  

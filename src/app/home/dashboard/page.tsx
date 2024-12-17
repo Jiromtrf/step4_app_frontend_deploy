@@ -1,11 +1,11 @@
-// frontend/src/app/dashboard/page.tsx
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react"; // useCallback を削除
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import HomeButton from "../../components/HomeButton";
+import styles from "./dashboard.module.css"; // CSSモジュールをインポート
 
 // レーダーチャートを動的にインポート（SSR無効）
 const RadarChart = dynamic(() => import("../../components/RadarChart"), { ssr: false });
@@ -194,22 +194,9 @@ export default function Dashboard() {
       </div>
 
       {/* 中央コンテンツ */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column", // 縦方向に配置
-          alignItems: "center",
-          backgroundColor: "#fff",
-          borderRadius: "10px",
-          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-          padding: "2rem",
-          gap: "2rem",
-          width: "90%",
-          maxWidth: "1200px",
-        }}
-      >
-        {/* レーダーチャート上部に日付選択ボタンを配置 */}
-        <div style={{ width: "100%", textAlign: "right" }}>
+      <div className={styles.container}>
+        {/* 日付選択ボタンを中央コンテンツの上部右側に配置 */}
+        <div className={styles.datePicker}>
           <input
             type="date"
             value={selectedDate}
@@ -224,60 +211,12 @@ export default function Dashboard() {
           />
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            gap: "2rem",
-            width: "100%",
-            flexWrap: "wrap",
-            justifyContent: "center",
-          }}
-        >
+        <div className={styles.innerFlexContainer}>
           {/* 女の子とフキダシ */}
-          <div
-            style={{
-              position: "relative",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              flex: "1 1 300px", // レスポンシブ対応
-              maxWidth: "400px",
-            }}
-          >
+          <div className={styles.speechBubbleContainer}>
             {/* フキダシ */}
-            <div
-              style={{
-                position: "relative",
-                marginBottom: "1rem",
-              }}
-            >
-              <p
-                style={{
-                  backgroundColor: "#fff",
-                  borderRadius: "10px",
-                  padding: "1rem",
-                  fontSize: "1.2rem",
-                  color: "#333",
-                  textAlign: "center",
-                  boxShadow: "0 6px 16px rgba(0, 0, 0, 0.2)",
-                  maxWidth: "300px",
-                }}
-              >
-                {message}
-              </p>
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: "-10px",
-                  left: "50%",
-                  transform: "translateX(-50%)",
-                  width: "0",
-                  height: "0",
-                  borderLeft: "10px solid transparent",
-                  borderRight: "10px solid transparent",
-                  borderTop: "10px solid #fff",
-                }}
-              ></div>
+            <div className={styles.speechBubble}>
+              {message}
             </div>
             {/* 女の子の画像 */}
             <Image
@@ -285,55 +224,21 @@ export default function Dashboard() {
               alt="Girl Image"
               width={300}
               height={300}
-              style={{
-                borderRadius: "50%",
-                border: "4px solid white",
-                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-              }}
+              className={styles.image}
             />
           </div>
 
           {/* レーダーチャートとドロップダウン */}
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column", // 縦方向に配置
-              alignItems: "center",
-              flex: "1 1 400px",
-              maxWidth: "600px",
-              width: "100%",
-            }}
-          >
-            <h1
-              style={{
-                color: "#333",
-                marginBottom: "1rem",
-                textAlign: "center",
-              }}
-            >
-              {userName} さん
-            </h1>
+          <div className={styles.roleContainer}>
+            {/* ユーザーネームの色を黒に設定 */}
+            <h1 style={{ color: '#000' }}>{userName} さん</h1>
 
-            {/* ドロップダウンリスト */}
-            <div
-              style={{
-                textAlign: "center",
-                marginBottom: "2rem",
-                width: "100%",
-              }}
-            >
+            {/* ドロップダウンリストの色を統一 */}
+            <div className={styles.selectRole}>
               <select
+                className={styles.customSelect} // CSSモジュールのクラスを適用
                 onChange={(e) => setRole(e.target.value as Roles)}
                 value={role}
-                style={{
-                  padding: "0.5rem",
-                  borderRadius: "4px",
-                  background: "#f5f5f5",
-                  border: "1px solid #cccccc",
-                  color: "#333",
-                  width: "100%", // 横幅を100%にして中央揃え
-                  maxWidth: "100px", // 最大幅を設定
-                }}
               >
                 {Object.keys(roles).map((roleKey) => (
                   <option key={roleKey} value={roleKey}>

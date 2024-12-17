@@ -1,7 +1,7 @@
 // frontend/src/app/home/breather/page.tsx
 "use client";
 
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useMemo } from "react";
 
 type Cell = "empty" | "black" | "white";
 type Board = Cell[][];
@@ -25,10 +25,11 @@ export default function Page() {
   const [gameOver, setGameOver] = useState(false);
   const [winner, setWinner] = useState<string | null>(null);
 
-  const directions = [
+  // directions を useMemo でメモ化
+  const directions = useMemo(() => [
     [-1, 0], [1, 0], [0, -1], [0, 1],
     [-1, -1], [-1, 1], [1, -1], [1, 1]
-  ];
+  ], []);
 
   const flipPieces = useCallback((row: number, col: number, newBoard: Board, player: "black" | "white") => {
     let flipped = false;
@@ -60,7 +61,7 @@ export default function Page() {
     });
 
     return flipped;
-  }, [directions]);
+  }, [directions]); // directions を依存配列に含める
 
   const canPlacePiece = useCallback((row: number, col: number, player: "black" | "white") => {
     if (board[row][col] !== "empty") return false;
@@ -124,6 +125,8 @@ export default function Page() {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
+        backgroundColor: "#f5deb3",
+        minHeight: "100vh",
       }}
     >
       <h1>Fast Othello</h1>
