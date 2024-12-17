@@ -169,7 +169,7 @@ export default function ReviewPage() {
             {dates.length === 0 ? "" : message}
           </div>
           {/* imgをImageに変更 */}
-          <Image src="/girl1.webp" alt="Girl" className={styles.image} width={200} height={200} />
+          <Image src="/girl1.webp" alt="Girl" className={styles.image} width={400} height={400} />
         </div>
       </div>
     </div>
