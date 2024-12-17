@@ -92,7 +92,7 @@ function ResultPageContent() {
                 <p className="text-lg text-gray-700 mb-4">正解数: {score} / {total}</p>
                 <p className="text-lg text-gray-700 mb-4">正解率: {percentage.toFixed(2)}%</p>
                 <p className="text-gray-700 mb-6">{getMessage()}</p>
-                <p className="text-gray-700">3秒後に成長アニメーションページへ移動します…</p>
+                <p className="text-gray-700">3秒後に成長確認ページへ移動します…</p>
             </div>
         </div>
     );
