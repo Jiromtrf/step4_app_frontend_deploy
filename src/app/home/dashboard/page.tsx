@@ -2,11 +2,12 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import HomeButton from "../../components/HomeButton";
 
+// レーダーチャートを動的にインポート（SSR無効）
 const RadarChart = dynamic(() => import("../../components/RadarChart"), { ssr: false });
 
 type Roles = "PdM" | "Design" | "Tech" | "Biz";
@@ -56,6 +57,7 @@ export default function Dashboard() {
   const [selectedDate, setSelectedDate] = useState<string>(""); // 日付選択用
   const [orientations, setOrientations] = useState<string[]>([]); // 初期値を空配列に設定
 
+  // スキルとユーザー名の取得
   useEffect(() => {
     if (session && session.accessToken) {
       console.log("Fetching skills for current user");
@@ -82,9 +84,15 @@ export default function Dashboard() {
           setSkills({ biz: data.biz, design: data.design, tech: data.tech });
           setUserName(data.name);
         })
-        .catch((err) => console.error('Error fetching skills:', err.message));
+        .catch((err: unknown) => {
+          if (err instanceof Error) {
+            console.error('Error fetching skills:', err.message);
+          } else {
+            console.error('Error fetching skills:', err);
+          }
+        });
 
-      // Fetch user orientations
+      // ユーザーの指向性の取得
       fetch(`${baseUrl}/api/user/orientation`, {
         headers: {
           Authorization: `Bearer ${session.accessToken}`,
@@ -94,26 +102,33 @@ export default function Dashboard() {
         .then((data: { orientations: string[] }) => {
           setOrientations(data.orientations || []); // undefined対策で空配列をデフォルトに
         })
-        .catch((err) => console.error("Error fetching orientations:", err.message));
+        .catch((err: unknown) => {
+          if (err instanceof Error) {
+            console.error("Error fetching orientations:", err.message);
+          } else {
+            console.error("Error fetching orientations:", err);
+          }
+        });
     }
   }, [session, selectedDate]); // selectedDate変更時にも再フェッチ
 
+  // メッセージの設定
   useEffect(() => {
     const goals = roles[role];
     const isAboveGoals =
       skills.biz >= goals.biz &&
       skills.design >= goals.design &&
       skills.tech >= goals.tech;
-  
+
     const areasToImprove: string[] = [];
     if (skills.biz < goals.biz) areasToImprove.push("Biz");
     if (skills.design < goals.design) areasToImprove.push("Design");
     if (skills.tech < goals.tech) areasToImprove.push("Tech");
-  
+
     const primaryOrientation = orientations?.[0] || null;
-  
+
     let chosenMessage = "";
-  
+
     // 能力達成のセリフを最初に追加
     if (isAboveGoals) {
       chosenMessage +=
@@ -131,7 +146,7 @@ export default function Dashboard() {
           Math.floor(Math.random() * messages.insufficient.length)
         ].replace("{不足スキル}", areasToImprove.join(", "));
     }
-  
+
     // マッチ/ミスマッチのセリフを追加
     if (primaryOrientation) {
       if (primaryOrientation === role) {
@@ -150,7 +165,7 @@ export default function Dashboard() {
             .replace("{ロール}", role);
       }
     }
-  
+
     setMessage(chosenMessage);
   }, [role, skills, orientations]);
 
@@ -163,116 +178,174 @@ export default function Dashboard() {
   }
 
   return (
-    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: "#f5deb3", minHeight: "100vh" }}>
-      {/* 日付選択 */}
-      <div style={{ position: "absolute", top: "60px", left: "20px" }}>
-        <input
-          type="date"
-          value={selectedDate}
-          onChange={(e) => setSelectedDate(e.target.value)}
-          style={{
-            padding: "0.5rem",
-            borderRadius: "4px",
-            background: "#f5f5f5",
-            border: "1px solid #cccccc",
-            color: "#333",
-          }}
-        />
-      </div>
-      {/* ホームボタンを左上に配置 */}
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "#f5deb3",
+        minHeight: "100vh",
+        position: "relative",
+      }}
+    >
+      {/* ホームボタンを左上に固定 */}
       <div style={{ position: "absolute", top: "20px", left: "20px" }}>
         <HomeButton />
       </div>
+
+      {/* 中央コンテンツ */}
       <div
         style={{
           display: "flex",
+          flexDirection: "column", // 縦方向に配置
           alignItems: "center",
           backgroundColor: "#fff",
           borderRadius: "10px",
           boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
           padding: "2rem",
           gap: "2rem",
+          width: "90%",
+          maxWidth: "1200px",
         }}
       >
-        {/* 女の子とフキダシ */}
-        <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center" }}>
-          {/* フキダシ */}
-          <div
+        {/* レーダーチャート上部に日付選択ボタンを配置 */}
+        <div style={{ width: "100%", textAlign: "right" }}>
+          <input
+            type="date"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
             style={{
-              position: "relative",
-              marginBottom: "1rem",
-            }}
-          >
-            <p
-              style={{
-                backgroundColor: "#fff",
-                borderRadius: "10px",
-                padding: "1rem",
-                fontSize: "1.2rem",
-                color: "#333",
-                textAlign: "center",
-                boxShadow: "0 6px 16px rgba(0, 0, 0, 0.2)",
-                maxWidth: "300px",
-              }}
-            >
-              {message}
-            </p>
-            <div
-              style={{
-                position: "absolute",
-                bottom: "-10px",
-                left: "50%",
-                transform: "translateX(-50%)",
-                width: "0",
-                height: "0",
-                borderLeft: "10px solid transparent",
-                borderRight: "10px solid transparent",
-                borderTop: "10px solid #fff",
-              }}
-            ></div>
-          </div>
-          {/* 女の子の画像 */}
-          <Image
-            src="/gal1.webp"
-            alt="Girl Image"
-            width={300}
-            height={300}
-            style={{
-              borderRadius: "50%",
-              border: "4px solid white",
-              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+              padding: "0.5rem",
+              borderRadius: "4px",
+              background: "#f5f5f5",
+              border: "1px solid #cccccc",
+              color: "#333",
             }}
           />
         </div>
 
-        {/* レーダーチャート */}
-        <div>
-          <h1 style={{ color: "#333", marginBottom: "1rem", textAlign: "center" }}>
-            {userName} さん
-          </h1>
-
-          {/* ドロップダウンリスト */}
-          <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-            <select
-              onChange={(e) => setRole(e.target.value as Roles)}
-              value={role}
+        <div
+          style={{
+            display: "flex",
+            gap: "2rem",
+            width: "100%",
+            flexWrap: "wrap",
+            justifyContent: "center",
+          }}
+        >
+          {/* 女の子とフキダシ */}
+          <div
+            style={{
+              position: "relative",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              flex: "1 1 300px", // レスポンシブ対応
+              maxWidth: "400px",
+            }}
+          >
+            {/* フキダシ */}
+            <div
               style={{
-                padding: "0.5rem",
-                borderRadius: "4px",
-                background: "#f5f5f5",
-                border: "1px solid #cccccc",
-                color: "#333",
+                position: "relative",
+                marginBottom: "1rem",
               }}
             >
-              {Object.keys(roles).map((role) => (
-                <option key={role} value={role}>
-                  {role}
-                </option>
-              ))}
-            </select>
+              <p
+                style={{
+                  backgroundColor: "#fff",
+                  borderRadius: "10px",
+                  padding: "1rem",
+                  fontSize: "1.2rem",
+                  color: "#333",
+                  textAlign: "center",
+                  boxShadow: "0 6px 16px rgba(0, 0, 0, 0.2)",
+                  maxWidth: "300px",
+                }}
+              >
+                {message}
+              </p>
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: "-10px",
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  width: "0",
+                  height: "0",
+                  borderLeft: "10px solid transparent",
+                  borderRight: "10px solid transparent",
+                  borderTop: "10px solid #fff",
+                }}
+              ></div>
+            </div>
+            {/* 女の子の画像 */}
+            <Image
+              src="/gal1.webp"
+              alt="Girl Image"
+              width={300}
+              height={300}
+              style={{
+                borderRadius: "50%",
+                border: "4px solid white",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+              }}
+            />
           </div>
 
-          <RadarChart skills={skills} goals={roles[role]} stepSize={20} />
+          {/* レーダーチャートとドロップダウン */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column", // 縦方向に配置
+              alignItems: "center",
+              flex: "1 1 400px",
+              maxWidth: "600px",
+              width: "100%",
+            }}
+          >
+            <h1
+              style={{
+                color: "#333",
+                marginBottom: "1rem",
+                textAlign: "center",
+              }}
+            >
+              {userName} さん
+            </h1>
+
+            {/* ドロップダウンリスト */}
+            <div
+              style={{
+                textAlign: "center",
+                marginBottom: "2rem",
+                width: "100%",
+              }}
+            >
+              <select
+                onChange={(e) => setRole(e.target.value as Roles)}
+                value={role}
+                style={{
+                  padding: "0.5rem",
+                  borderRadius: "4px",
+                  background: "#f5f5f5",
+                  border: "1px solid #cccccc",
+                  color: "#333",
+                  width: "100%", // 横幅を100%にして中央揃え
+                  maxWidth: "100px", // 最大幅を設定
+                }}
+              >
+                {Object.keys(roles).map((roleKey) => (
+                  <option key={roleKey} value={roleKey}>
+                    {roleKey}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* レーダーチャート */}
+            <RadarChart skills={skills} goals={roles[role]} stepSize={20} />
+          </div>
         </div>
       </div>
     </div>
