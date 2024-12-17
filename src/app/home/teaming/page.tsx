@@ -10,8 +10,6 @@ import Image from "next/image";
 import HomeButton from "../../components/HomeButton";
 import Link from 'next/link';
 
-const RadarChart = dynamic(() => import("../../components/RadarChart"), { ssr: false });
-
 interface User {
   user_id: number;
   name: string;
@@ -63,8 +61,11 @@ const teamComments = [
   "お互い助け合ってるのが伝わってきて、めっちゃエモいチーム！がんばろ～！💖",
 ];
 
+const RadarChart = dynamic(() => import("../../components/RadarChart"), { ssr: false });
+
 export default function Teaming() {
   const { data: session } = useSession();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // サイドバー開閉状態管理
   const [message, setMessage] = useState<string>(""); // 女の子のメッセージ
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [roles, setRoles] = useState<Roles>({
@@ -391,9 +392,18 @@ export default function Teaming() {
 
   return (
     <div className={styles.container}>
-      <aside className={styles.sidebar}>
-      <HomeButton /> {/* サイドバー内にホームボタン追加 */}
-      
+      {/* サイドバー開閉ボタン */}
+      <button
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        className={styles.toggleSidebarButton}
+      >
+        {isSidebarOpen ? "<" : ">"}
+      </button>
+
+      {/* サイドバー */}
+      <aside className={`${styles.sidebar} ${isSidebarOpen ? styles.sidebarOpen : styles.sidebarClosed}`}>
+        <HomeButton /> {/* サイドバー内にホームボタン追加 */}
+        
         <h2>チーム</h2>
         <ul>
           <li className={styles.active}>チーム構成</li>
@@ -419,89 +429,89 @@ export default function Teaming() {
         </div>
 
         {currentTeamId ? (
-  <>
-    <div className={styles.roles}>
-      {(["PdM", "Biz", "Tech", "Design"] as (keyof Roles)[]).map((role) => {
-        const roleData = roles[role];
-        return (
-          <div key={role} className={styles.roleCard}>
-            <div className={styles.roleHeader} style={{ backgroundColor: getRoleColor(role) }}>
-              {role}
-              <button onClick={() => handleAddMemberClick(role)} className={styles.addButton}>
-                +
-              </button>
-            </div>
-            {roleData && (
-              <div className={styles.roleDetails}>
-                {Array.isArray(roleData) ? (
-                  roleData.map((member) => (
-                    <div key={member.user_id} className={styles.member}>
-                      <Image
-                        src={member.avatar_url || "/default-avatar.png"}
-                        alt={member.name}
-                        className={styles.avatar}
-                        width={50}
-                        height={50}
-                      />
-                      <p>{member.name}</p>
-                      <p>
-                        得意分野:{" "}
-                        {member.specialties && member.specialties.length > 0
-                          ? member.specialties.join(", ")
-                          : "登録なし"}
-                      </p>
-                      <p>
-                        志向性:{" "}
-                        {member.orientations && member.orientations.length > 0
-                          ? member.orientations.join(", ")
-                          : "登録なし"}
-                      </p>
-                      <p>
-                        コアタイム:{" "}
-                        {member.core_time && member.core_time.trim() !== ""
-                          ? member.core_time
-                          : "登録なし"}
-                      </p>
-                      <button onClick={() => handleRemoveMember(role)}>外す</button>
+          <>
+            <div className={styles.roles}>
+              {(["PdM", "Biz", "Tech", "Design"] as (keyof Roles)[]).map((role) => {
+                const roleData = roles[role];
+                return (
+                  <div key={role} className={styles.roleCard}>
+                    <div className={styles.roleHeader} style={{ backgroundColor: getRoleColor(role) }}>
+                      {role}
+                      <button onClick={() => handleAddMemberClick(role)} className={styles.addButton}>
+                        +
+                      </button>
                     </div>
-                  ))
-                ) : (
-                  <div className={styles.member}>
-                    <Image
-                      src={roleData.avatar_url || "/default-avatar.png"}
-                      alt={roleData.name}
-                      className={styles.avatar}
-                      width={50}
-                      height={50}
-                    />
-                    <p>{roleData.name}</p>
-                    <p>
-                      得意分野:{" "}
-                      {roleData.specialties && roleData.specialties.length > 0
-                        ? roleData.specialties.join(", ")
-                        : "登録なし"}
-                    </p>
-                    <p>
-                      志向性:{" "}
-                      {roleData.orientations && roleData.orientations.length > 0
-                        ? roleData.orientations.join(", ")
-                        : "登録なし"}
-                    </p>
-                    <p>
-                      コアタイム:{" "}
-                      {roleData.core_time && roleData.core_time.trim() !== ""
-                        ? roleData.core_time
-                        : "登録なし"}
-                    </p>
-                    <button onClick={() => handleRemoveMember(role)}>外す</button>
+                    {roleData && (
+                      <div className={styles.roleDetails}>
+                        {Array.isArray(roleData) ? (
+                          roleData.map((member) => (
+                            <div key={member.user_id} className={styles.member}>
+                              <Image
+                                src={member.avatar_url || "/default-avatar.png"}
+                                alt={member.name}
+                                className={styles.avatar}
+                                width={50}
+                                height={50}
+                              />
+                              <p>{member.name}</p>
+                              <p>
+                                得意分野:{" "}
+                                {member.specialties && member.specialties.length > 0
+                                  ? member.specialties.join(", ")
+                                  : "登録なし"}
+                              </p>
+                              <p>
+                                志向性:{" "}
+                                {member.orientations && member.orientations.length > 0
+                                  ? member.orientations.join(", ")
+                                  : "登録なし"}
+                              </p>
+                              <p>
+                                コアタイム:{" "}
+                                {member.core_time && member.core_time.trim() !== ""
+                                  ? member.core_time
+                                  : "登録なし"}
+                              </p>
+                              <button onClick={() => handleRemoveMember(role)}>外す</button>
+                            </div>
+                          ))
+                        ) : (
+                          <div className={styles.member}>
+                            <Image
+                              src={roleData.avatar_url || "/default-avatar.png"}
+                              alt={roleData.name}
+                              className={styles.avatar}
+                              width={50}
+                              height={50}
+                            />
+                            <p>{roleData.name}</p>
+                            <p>
+                              得意分野:{" "}
+                              {roleData.specialties && roleData.specialties.length > 0
+                                ? roleData.specialties.join(", ")
+                                : "登録なし"}
+                            </p>
+                            <p>
+                              志向性:{" "}
+                              {roleData.orientations && roleData.orientations.length > 0
+                                ? roleData.orientations.join(", ")
+                                : "登録なし"}
+                            </p>
+                            <p>
+                              コアタイム:{" "}
+                              {roleData.core_time && roleData.core_time.trim() !== ""
+                                ? roleData.core_time
+                                : "登録なし"}
+                            </p>
+                            <button onClick={() => handleRemoveMember(role)}>外す</button>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
+                );
+              })}
+            </div>
 
             {/* girlAndChartコンテナを追加 */}
             <div className={styles.girlAndChart}>
@@ -525,16 +535,19 @@ export default function Teaming() {
                     className={styles.girlImage}
                   />
                 </div>
-                </div>
+              </div>
             </div>
           </>
         ) : (
           <div>
             <p>現在、あなたはどのチームにも所属していません。</p>
             <p>新たにチームを作成しますか？</p>
-            <button onClick={() => setIsCreateTeamModalOpen(true)}
-              className={styles.createButton} 
-              >チームを作成</button>
+            <button 
+              onClick={() => setIsCreateTeamModalOpen(true)} 
+              className={styles.createButton}  
+            >
+              チームを作成
+            </button>
           </div>
         )}
       </main>

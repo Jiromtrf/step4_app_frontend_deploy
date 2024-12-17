@@ -1,8 +1,9 @@
+/* src/app/home/teaming/teaming.module.css */
+
 .container {
+  min-height: 100vh;
   display: flex;
-  height: 100vh;
   color: #333;
-  font-family: "Arial", sans-serif;
   background-color: #f5deb3;
 }
 
@@ -11,10 +12,48 @@
   background-color: #2c2c2c;
   color: white;
   padding: 20px;
+  margin-left: 20px;
+  transition: transform 0.3s ease; /* 開閉時のアニメーション */
 }
 
+.sidebarClosed {
+  transform: translateX(-190px); /* サイドバーを左に隠す */
+}
+
+.sidebarOpen {
+  transform: translateX(0); /* サイドバーを表示 */
+}
+
+/* サイドバーの開閉ボタンのスタイルを追加 */
+.toggleSidebarButton {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 40px; /* ボタンの幅 */
+  height: 100vh; /* 縦方向いっぱい */
+  background-color: #ffcc00; /* 指定の色 */
+  color: #000; /* テキスト色（必要に応じて変更可） */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1000; /* 他の要素より前面に表示 */
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.toggleSidebarButton:hover {
+  background-color: #e6b800; /* ホバー時の色変化（オプション） */
+}
+
+/* 他の既存スタイルはそのまま */
+
 .sidebar h2 {
-  margin-bottom: 20px;
+  margin-top: 20px; /* ホームボタンと<h2>の間隔を調整 */
+  margin-bottom: 20px; /* <h2>とリストの間隔を調整 */
 }
 
 .sidebar ul {
@@ -39,6 +78,10 @@
   padding: 20px;
 }
 
+.phaseSelector {
+  margin-bottom: 20px;
+}
+
 .roles {
   display: flex;
   justify-content: space-around;
@@ -46,7 +89,7 @@
 }
 
 .roleCard {
-  width: 250px;
+  width: 200px;
   background: white;
   border-radius: 10px;
   text-align: center;
@@ -101,7 +144,6 @@
 .member p:not(:first-of-type) {
   font-size: 0.8rem; /* 得意分野・志向性・コアタイムは小さく */
 }
-
 
 .member button {
   margin-top: 5px;
@@ -344,6 +386,27 @@
   gap: 20px; /* 吹き出しと女の子の画像の間隔を調整 */
 }
 
-.sidebar h2 {
-  margin-top: 20px; /* 好みの値に調整 */
+/* 「開閉」ボタンのスタイルはここに含まれる */
+.toggleSidebarButton {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 20px; /* ボタンの幅 */
+  height: 100vh; /* 縦方向いっぱい */
+  background-color: #ffcc00; /* 指定の色 */
+  color: #000; /* テキスト色 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1000; /* 他の要素より前面に表示 */
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.toggleSidebarButton:hover {
+  background-color: #e6b800; /* ホバー時の色変化（オプション） */
 }

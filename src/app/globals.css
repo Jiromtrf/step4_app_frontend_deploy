@@ -131,3 +131,10 @@ body {
 .note-toggle:hover {
   text-decoration: underline;
 }
+
+html, body {
+  background-color: #f5deb3; /* body/htmlにも同じ背景色を設定 */
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
