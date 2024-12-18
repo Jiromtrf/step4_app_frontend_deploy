@@ -1,4 +1,4 @@
-/* src/app/home/teaming/teaming.module.css */
+/* teaming.module.css */
 
 .container {
   min-height: 100vh;
@@ -29,10 +29,10 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 40px; /* ボタンの幅 */
+  width: 20px; /* ボタンの幅 */
   height: 100vh; /* 縦方向いっぱい */
   background-color: #ffcc00; /* 指定の色 */
-  color: #000; /* テキスト色（必要に応じて変更可） */
+  color: #000; /* テキスト色 */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -49,8 +49,7 @@
   background-color: #e6b800; /* ホバー時の色変化（オプション） */
 }
 
-/* 他の既存スタイルはそのまま */
-
+/* サイドバーの内部スタイル */
 .sidebar h2 {
   margin-top: 20px; /* ホームボタンと<h2>の間隔を調整 */
   margin-bottom: 20px; /* <h2>とリストの間隔を調整 */
@@ -225,6 +224,8 @@
   padding: 20px;
   max-width: 600px;
   width: 80%;
+  max-height: 80vh; /* ビューポートの80%の高さに制限 */
+  overflow: hidden; /* 内部のスクロールは子要素に任せる */
   margin: 0 auto;
   position: absolute;
   top: 50%;
@@ -232,6 +233,8 @@
   transform: translate(-50%, -50%);
   border-radius: 12px;
   outline: none;
+  display: flex; /* Flexboxを使用 */
+  flex-direction: column; /* 縦方向に配置 */
 }
 
 .searchFilters {
@@ -293,6 +296,13 @@
   background-color: #ff7875;
 }
 
+.searchResults {
+  flex: 1; /* 検索フィルター以外の残りのスペースを占める */
+  overflow-y: auto; /* 垂直方向にスクロール可能 */
+  margin-top: 10px;
+  padding-right: 10px; /* スクロールバーのスペース確保 */
+}
+
 .searchResult {
   display: flex;
   gap: 10px;
@@ -301,13 +311,6 @@
   padding: 10px;
   border-radius: 8px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.searchResult .avatar {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  border: 1px solid #ccc;
 }
 
 .userInfo {
@@ -345,6 +348,7 @@
   border-radius: 4px;
   cursor: pointer;
   margin-top: 20px;
+  align-self: flex-end; /* 右下に配置 */
   transition: background-color 0.3s ease;
 }
 
@@ -384,29 +388,4 @@
   flex-direction: column;
   align-items: center; /* 必要に応じて中央揃え */
   gap: 20px; /* 吹き出しと女の子の画像の間隔を調整 */
-}
-
-/* 「開閉」ボタンのスタイルはここに含まれる */
-.toggleSidebarButton {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 20px; /* ボタンの幅 */
-  height: 100vh; /* 縦方向いっぱい */
-  background-color: #ffcc00; /* 指定の色 */
-  color: #000; /* テキスト色 */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 1000; /* 他の要素より前面に表示 */
-  border-top-right-radius: 8px;
-  border-bottom-right-radius: 8px;
-  font-size: 1.5rem;
-  font-weight: bold;
-  transition: background-color 0.3s ease;
-}
-
-.toggleSidebarButton:hover {
-  background-color: #e6b800; /* ホバー時の色変化（オプション） */
 }
