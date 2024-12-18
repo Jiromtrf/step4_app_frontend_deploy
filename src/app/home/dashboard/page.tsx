@@ -19,10 +19,10 @@ interface Skills {
 }
 
 const roles: Record<Roles, Skills> = {
-  PdM: { biz: 90, design: 60, tech: 80 },
+  PdM: { biz: 90, design: 80, tech: 80 },
   Design: { biz: 20, design: 90, tech: 40 },
-  Tech: { biz: 20, design: 20, tech: 90 },
-  Biz: { biz: 50, design: 20, tech: 20 },
+  Tech: { biz: 20, design: 40, tech: 90 },
+  Biz: { biz: 90, design: 40, tech: 20 },
 };
 
 const messages = {
