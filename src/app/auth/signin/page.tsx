@@ -72,8 +72,8 @@ export default function SignIn() {
       </button>
       {showNote && (
         <div className="note">
-          <p>ユーザーID: <b>1</b>または <b>2</b></p>
-          <p>パスワード: <b>password</b></p>
+          <p>ユーザーID: <b>10</b>または <b>11</b></p>
+          <p>パスワード: <b>20241219</b></p>
         </div>
       )}
     </div>
